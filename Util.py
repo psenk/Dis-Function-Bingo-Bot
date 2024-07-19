@@ -1,10 +1,16 @@
+import datetime
+import discord
+
+import discord.ext
+import discord.ext.commands
+
 task_number_dict = {
     1: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
     2: "Get a Purple!",
     3: "Complete the Back in my Day Combat Task",
     4: "Obtain a Holy Ornament Kit AND a Sanguine Ornament Kit",
     5: "Complete a set of Justicar",
-    6: "Complete a Deathless Hard Mode with at least 5 Team Members ",
+    6: "Complete a Deathless Hard Mode with at least 5 Team Members",
     7: "Complete the Personal Space Combat Achievement",
     8: "Bring a Learner through a first Clear Hard Mode",
     9: "Get Lil'Zik",
@@ -62,6 +68,7 @@ task_number_dict = {
     61: "Complete a 5-Scale Challenge Mode in 25 minutes or less",
     62: "Get a Twisted Recolor Kit",
     63: "Get the Metamorphic Dust",
+    999: "Test Task"
 }
 
 task_points_dict = {
@@ -127,8 +134,12 @@ task_points_dict = {
     60: 2,
     61: 2,
     62: 2,
-    63: 3 
+    63: 3,
 }
+
+# Discord role IDs
+bingo_teams = [1262935908777332757]
+
 
 # Checks if task id is out of bounds (1 <= task_id <= num_tasks)
 # Tested good 16 Jul 2024
@@ -142,8 +153,15 @@ def check_task_id(task_no) -> bool:
     else:
         return True
 
-def check_screenshots(screenshots):
+
+def check_screenshots(screenshots) -> bool:
     pass
 
-def get_user_team(user):
-    pass
+
+# Gets users bingo team
+# Tested good 19 Jul 2024
+def get_user_team(roles: list) -> str:
+    for team_id in bingo_teams:
+        for role in roles:
+            if team_id == role.id:
+                return role.name
