@@ -25,7 +25,7 @@ LOGS_CHANNEL = 1194488938480537740 # ! SWAP DURING LIVE BINGO
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler = logging.FileHandler(filename="/logs/discord.log", encoding="utf-8", mode="w")
 
 
 # "!bingobutt" command

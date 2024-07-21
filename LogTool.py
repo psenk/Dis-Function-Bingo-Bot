@@ -38,7 +38,7 @@ async def create_log_embed(ctx: discord.ext.commands.Context, logs_channel: disc
         async def approve_button(
             self, interaction: discord.Interaction, button: discord.ui.Button
         ) -> None:
-            await ctx.send(f"Submission for Task # {task_id}: {Util.task_number_dict.get(task_id)} approved!")
+            await ctx.send(f"Submission for Task #{task_id}: {Util.task_number_dict.get(task_id)} approved!")
             await message.add_reaction("✅")
             await ctx.message.add_reaction("✅")
             # send logs
@@ -48,7 +48,7 @@ async def create_log_embed(ctx: discord.ext.commands.Context, logs_channel: disc
         async def reject_button(
             self, interaction: discord.Interaction, button: discord.ui.Button
         ) -> None:
-            await ctx.send(f"Submission for Task # {task_id}: {Util.task_number_dict.get(task_id)} rejected!")
+            await ctx.send(f"Submission for Task #{task_id}: {Util.task_number_dict.get(task_id)} rejected!")
             await message.add_reaction("❌")
             await ctx.message.add_reaction("❌")
             await interaction.response.edit_message(view=None)
