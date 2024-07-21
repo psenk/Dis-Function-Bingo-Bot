@@ -5,13 +5,13 @@ from discord.ext import commands
 import random
 import logging
 import os
+import discord.ext.commands
 from dotenv import load_dotenv
-
+import discord.ext
 load_dotenv(override=True)
-
-# custom classes
 import Util
-import SubmitTool
+from ApproveTool import ApproveTool
+from SubmitTool import SubmitTool
 
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -19,19 +19,22 @@ GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
 DB_LOCALHOST = os.getenv("MYSQL_LOCALHOST")
 DB_USER_NAME = os.getenv("MYSQL_USER_NAME")
 DB_PW = os.getenv("MYSQL_PW")
-
 LOGS_CHANNEL = 1194488938480537740 # ! SWAP DURING LIVE BINGO
 
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
-handler = logging.FileHandler(filename="/logs/discord.log", encoding="utf-8", mode="w")
+handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mode="w")
 
+# TODO: add UUID to database in submissions as primary key
 
-# "!bingobutt" command
-# For testing purposes, ping pong, bingo tradition
 @bot.command()
-async def butt(ctx) -> None:
+async def butt(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord context object    
+    description: Fun ping server command    
+    return: None
+    """
     # await ctx.send("http://tinyurl.com/s8aw585y")
     word = ""
     for i in "bingobutt":
@@ -45,11 +48,13 @@ async def butt(ctx) -> None:
     await ctx.send(word + "~,.")
 
 
-# "!bingosubmit" command
-# For submitting a bingo task to the admin team
 @bot.command()
-async def submit(ctx) -> None:
-
+async def submit(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord context object
+    description: Submits task for approval
+    return: None
+    """
     cmd: list = ctx.message.content.split()
 
     # no task number error
@@ -76,25 +81,24 @@ async def submit(ctx) -> None:
     uuid_no = uuid.uuid1()
     await SubmitTool.create_submit_tool_embed(ctx, bot.get_channel(LOGS_CHANNEL), task_id, team, multi, uuid_no)
 
-""" # FOR TESTING ONLY
-# Test "!bingosubmit" command
+
 @bot.command()
-async def test(ctx) -> None:
-    await ctx.send("!bingosubmit")#, file = discord.File("thisisfine.jpg"))
- """
+async def approve(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord context object
+    description: Prints list of tasks that require submission
+    return: None
+    """
+    await ApproveTool.create_approve_embed(ctx)
+    
 
-# "!bingoapprove" command
-# Shows list of bingo tasks awaiting approval
-# Allows task approval/rejection
-@bot.command()
-async def approve(ctx) -> None:
-    pass
-
-
-
-# Ran every time bot boots up
 @bot.event
-async def on_ready():
+async def on_ready() -> None:
+    """
+    param: None
+    description: This code runs every time the bot boots up
+    return: None
+    """
     # LOG
     print(f"Bingo Bot online as of {datetime.datetime.now()}.")
 

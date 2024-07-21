@@ -1,9 +1,3 @@
-import datetime
-import discord
-
-import discord.ext
-import discord.ext.commands
-
 task_number_dict = {
     1: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
     2: "Get a purple!",
