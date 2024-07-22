@@ -8,6 +8,7 @@ import os
 import discord.ext.commands
 from dotenv import load_dotenv
 import discord.ext
+
 load_dotenv(override=True)
 import Util
 from ApproveTool import ApproveTool
@@ -19,20 +20,19 @@ GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
 DB_LOCALHOST = os.getenv("MYSQL_LOCALHOST")
 DB_USER_NAME = os.getenv("MYSQL_USER_NAME")
 DB_PW = os.getenv("MYSQL_PW")
-LOGS_CHANNEL = 1194488938480537740 # ! SWAP DURING LIVE BINGO
+LOGS_CHANNEL = 1194488938480537740  # ! SWAP DURING LIVE BINGO
 
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
 handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mode="w")
 
-# TODO: add UUID to database in submissions as primary key
 
 @bot.command()
 async def butt(ctx: discord.ext.commands.Context) -> None:
     """
-    param: Discord context object    
-    description: Fun ping server command    
+    param: Discord context object
+    description: Fun ping server command
     return: None
     """
     # await ctx.send("http://tinyurl.com/s8aw585y")
@@ -67,7 +67,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if not task_id_check:
         await ctx.send("Your task ID is out of bounds.")
         return
-    
+
     screenshots: list = ctx.message.attachments
     # no screenshots error
     if not screenshots:
@@ -89,8 +89,9 @@ async def approve(ctx: discord.ext.commands.Context) -> None:
     description: Prints list of tasks that require submission
     return: None
     """
-    await ApproveTool.create_approve_embed(ctx)
-    
+    approve_tool = ApproveTool(ctx)
+    await approve_tool.create_approve_embed()
+
 
 @bot.event
 async def on_ready() -> None:
