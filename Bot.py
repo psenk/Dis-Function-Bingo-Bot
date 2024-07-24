@@ -1,19 +1,24 @@
 import datetime
-import uuid
-import discord
-from discord.ext import commands
-import random
 import logging
 import os
+import random
+import uuid
+
+import discord
+import discord.ext
+from discord.ext import commands
 import discord.ext.commands
 from dotenv import load_dotenv
-import discord.ext
+
+from SheetsTool import SheetsTool
+
 load_dotenv(override=True)
-from QueryTool import QueryTool
+from ConfirmTool import ConfirmTool
 import Util
 from ApproveTool import ApproveTool
+from BonusTool import BonusTool
+from QueryTool import QueryTool
 from SubmitTool import SubmitTool
-
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
@@ -56,12 +61,38 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     return: None
     """
     cmd: list = ctx.message.content.split()
-
-    # no task number error
     if len(cmd) == 1:
         await ctx.send("No bingo task number detected with post.")
         return
-    
+
+    if cmd[1] == "bonus":
+        team: str = Util.get_user_team(ctx.author.roles)
+        bonus_view = BonusTool()
+        await ctx.send("Select a purple from the dropdown menu:", view=bonus_view)
+        await bonus_view.wait()
+        purple = bonus_view.purp
+        
+        await ctx.send("Please enter the date listed on the Clan Events plugin in the screenshot below.\nUse the following format: MM-DD-YY\nExample: **08-16-91**")
+        date = await bot.wait_for("message")
+        
+        await ctx.send("Please enter the time listed on the Clan Events plugin in the screenshot below.\nUse the following format: HH:MM:SS PM\nExample: **10:52:01 AM**")        
+        time = await bot.wait_for("message")
+        
+        await ctx.send("Please enter the name of the player that obtained the drop below.")
+        player = await bot.wait_for("message")
+        
+        confirm_view = ConfirmTool()
+        await ctx.send(f"Player **{player.content.strip()}** obtained a **{purple}** for team **{team}** on **{date.content.strip()}** at **{time.content.strip()}**.  Does this all look correct?", view=confirm_view)
+        await confirm_view.wait()
+        
+        if confirm_view.confirm == "No":
+            await ctx.send("Bonus submission cancelled.")
+            return
+        else:
+            await ctx.send("Your bonus submission has been sent to the bingo admin team.")
+            SheetsTool.add_purple(purple, team, date.content, time.content, player.content)
+            return
+
     task_id: int = int(cmd[1])
     task_id_check: bool = Util.check_task_id(task_id)
     # task no out of bounds error
@@ -77,6 +108,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if not screenshots:
         await ctx.send("No screenshots detected with submission.")
         return
+
     multi: bool = len(screenshots) > 1
 
     team: str = Util.get_user_team(ctx.author.roles)
@@ -132,17 +164,17 @@ async def helpme(ctx: discord.ext.commands.Context) -> None:
     description: Shows list of commands available to normal users
     return: None
     """
-    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF
-    )
+    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF)
     help_embed.add_field(name="!bingohelpme", value="Shows a list of bot commands.", inline=True)
     help_embed.add_field(name="!bingosubmit X", value="Submit bingo task X to bingo admin team.", inline=True)
     help_embed.add_field(name="", value="", inline=True)
     help_embed.add_field(name="!bingoranch", value="Ram Ranch Really Rocks!", inline=True)
     help_embed.add_field(name="!bingobutt", value="Bingo butt!", inline=True)
     help_embed.add_field(name="", value="", inline=True)
-    
+
     await ctx.send(embed=help_embed)
-    
+
+
 @bot.command()
 async def helpadmin(ctx: discord.ext.commands.Context) -> None:
     """
@@ -153,13 +185,13 @@ async def helpadmin(ctx: discord.ext.commands.Context) -> None:
     if not Util.is_admin(ctx):
         await ctx.send("You are not authorized to use this command!")
         return
-    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF
-    )
+    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF)
     help_embed.add_field(name="!bingoapprove", value="Shows interactive window for approving bingo submissions.", inline=True)
     help_embed.add_field(name="!bingoday X", value="Sets the day of the bingo to X.", inline=True)
     help_embed.add_field(name="", value="", inline=True)
-    
+
     await ctx.send(embed=help_embed)
+
 
 @bot.event
 async def on_ready() -> None:

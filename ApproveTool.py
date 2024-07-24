@@ -73,7 +73,7 @@ class ApproveTool(discord.ui.View):
         )
         approve_tool.add_field(name="", value="", inline=True)
         approve_tool.add_field(name="Task ID:", value=f"{submission.get('task_id')}", inline=True)
-        approve_tool.add_field(name="Task:", value=f"{Util.task_number_dict[submission.get('task_id')]}", inline=True)
+        approve_tool.add_field(name="Task:", value=f"{Util.TASK_NUMBER_DICT[submission.get('task_id')]}", inline=True)
         approve_tool.add_field(name="", value="", inline=True)
 
         return approve_tool
@@ -102,7 +102,7 @@ class ApproveTool(discord.ui.View):
         submission = self.submissions[self.page]
         task_id = submission.get("task_id")
         await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{task_id}: {Util.task_number_dict.get(task_id)} has been approved!")
+        await self.ctx.send(f"Submission for Task #{task_id}: {Util.TASK_NUMBER_DICT.get(task_id)} has been approved!")
         msg = await ApproveTool.get_message(self.bot, submission.get("message_id"), submission.get("team"))
         await msg.add_reaction("✅")
         self.submissions.pop(self.page)
@@ -123,7 +123,7 @@ class ApproveTool(discord.ui.View):
         submission = self.submissions[self.page]
         task_id = submission.get("task_id")
         await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{task_id}: {Util.task_number_dict.get(task_id)} has been rejected.")
+        await self.ctx.send(f"Submission for Task #{task_id}: {Util.TASK_NUMBER_DICT.get(task_id)} has been rejected.")
         msg = await ApproveTool.get_message(self.bot, submission.get("message_id"), submission.get("team"))
         await msg.add_reaction("❌")
         self.submissions.pop(self.page)

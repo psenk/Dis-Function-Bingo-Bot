@@ -65,7 +65,7 @@ class LogTool(discord.ui.View):
         log_embed.add_field(name="Team:", value=self.team, inline=True)
         log_embed.add_field(name="", value="", inline=True)
         log_embed.add_field(name="Player:", value=self.ctx.author.display_name, inline=True)
-        log_embed.add_field(name="Task:", value=Util.task_number_dict.get(self.task_id))
+        log_embed.add_field(name="Task:", value=Util.TASK_NUMBER_DICT.get(self.task_id))
         log_embed.add_field(name="", value="", inline=True)
         log_embed.add_field(name="Submitted on:", value=self.timestamp, inline=True)
         
@@ -74,7 +74,7 @@ class LogTool(discord.ui.View):
     @discord.ui.button(label="Approve", style=discord.ButtonStyle.green)
     async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.task_number_dict.get(self.task_id)} has been approved!")
+        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been approved!")
         await self.message.add_reaction("✅")
         await self.ctx.message.add_reaction("✅")
         sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id)
@@ -86,7 +86,7 @@ class LogTool(discord.ui.View):
     @discord.ui.button(label="Reject", style=discord.ButtonStyle.red)
     async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.task_number_dict.get(self.task_id)} has been rejected!")
+        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been rejected!")
         await self.message.add_reaction("❌")
         await self.ctx.message.add_reaction("❌")
         await QueryTool.delete_submission(self.task_id, self.team)

@@ -5,7 +5,7 @@ import discord.ext.commands
 
 BINGO_ADMIN = 1265728711731183759
 
-task_number_dict = {
+TASK_NUMBER_DICT = {
     1: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
     2: "Get a purple!",
     3: "Complete the \"Back in my Day\" Combat Task",
@@ -72,7 +72,7 @@ task_number_dict = {
     999: "Test Task"
 }
 
-task_points_dict = {
+TASK_POINTS_DICT = {
     1: 1,
     2: 1,
     3: 1,
@@ -138,7 +138,7 @@ task_points_dict = {
     63: 3,
 }
 
-team_sheets_column_dict = {
+TEAMS_SHEETS_COLUMN_DICT = {
     # value must be int, not char
     "Test Bingo Team": 6,
     "Cheese Cape": 7,
@@ -146,6 +146,21 @@ team_sheets_column_dict = {
     "Drunk Chinchompa": 9,
     "Starship Enterprise": 10
 }
+
+COX_PURPLES = [
+    "Dexterous prayer scroll",
+    "Arcane prayer scroll",
+    "Twisted buckler",
+    "Dragon hunter crossbow",
+    "Dinh's bulwark",
+    "Ancestral hat",
+    "Ancestral robe top",
+    "Ancestral robe bottom",
+    "Dragon claws",
+    "Elder maul",
+    "Kodai insignia",
+    "Twisted bow"
+]
 
 # Discord role IDs
 bingo_teams = [1262935908777332757]
@@ -157,7 +172,7 @@ def check_task_id(task_no: int) -> bool:
     if task_no <= 0:
         print("ERROR: Task submission failed, task id out of bounds. (less than zero)")
         return False
-    elif task_no > len(task_number_dict):
+    elif task_no > len(TASK_NUMBER_DICT):
         print("ERROR: Task submission failed, task id out of bounds. (number too high)")
         return False
     else:

@@ -40,9 +40,9 @@ class SubmitTool(discord.ui.View):
         description: posts submission tool embed
         return: None
         """
-        description: str = f"""You are attempting to submit: **Task #{self.task_id}\n{Util.task_number_dict.get(self.task_id)}**\nfor the Team: **{self.team}**.\nIs this correct?\n
+        description: str = f"""You are attempting to submit: **Task #{self.task_id}\n{Util.TASK_NUMBER_DICT.get(self.task_id)}**\nfor the Team: **{self.team}**.\nIs this correct?\n
         Please ensure your submission contains:\n
-        1. The bingo codeword\n2. The key item in view\n3. Chat notification (if applicable)"""
+        1. The bingo codeword\n2. The key item in view\n3. Chat notification (if applicable)\n**If this is a Chambers of Xeric purple, please use command '!bingosubmit {self.task_id} bonus'**"""
 
         submit_tool = discord.Embed(title=f"Bingo Tile Submission Tool", color=0x0000FF, description=description)
         submit_tool.set_author(name="Dis Function's Bingo Bonanza")
@@ -57,7 +57,7 @@ class SubmitTool(discord.ui.View):
         d = datetime.datetime.now()
         timestamp = d.strftime("%Y-%m-%d at %H:%M:%S")
         await self.ctx.send("Sending submission to bingo admins...", delete_after=3.0)
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.task_number_dict.get(self.task_id)} sent by {self.ctx.author.display_name} on {timestamp}.")
+        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} sent by {self.ctx.author.display_name} on {timestamp}.")
         await QueryTool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, self.ctx.message.id)
         log_tool = LogTool(self.ctx, self.logs_channel, self.multi, self.team, self.task_id, d, self.uuid_no)
         await log_tool.create_log_embed()
