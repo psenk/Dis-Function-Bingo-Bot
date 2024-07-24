@@ -8,7 +8,6 @@ import os
 import discord.ext.commands
 from dotenv import load_dotenv
 import discord.ext
-
 load_dotenv(override=True)
 from QueryTool import QueryTool
 import Util
@@ -28,8 +27,6 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
 handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mode="w")
 
-
-# ! TODO: help embed
 
 @bot.command()
 async def butt(ctx: discord.ext.commands.Context) -> None:

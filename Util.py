@@ -34,7 +34,7 @@ task_number_dict = {
     26: "Obtain at least 2 different Cerberus uniques",
     27: "Obtain any Slayer Boss Jar",
     28: "Get a good purple (No Ring, No Ward)",
-    29: "Exit the raid with all 6 Books in 1 players inventory",
+    29: "Have all 6 books in 1 person's inventory in the Chest Room",
     30: "Upgrade a Icthlarin's Shroud (Min level 2, must be an upgrade, not a first obtain)",
     31: "Obtain Any Pet Transmog",
     32: "Obtain a complete set of Masori",
