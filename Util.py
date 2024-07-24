@@ -1,3 +1,10 @@
+import discord
+
+import discord.ext
+import discord.ext.commands
+
+BINGO_ADMIN = 1265728711731183759
+
 task_number_dict = {
     1: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
     2: "Get a purple!",
@@ -131,13 +138,22 @@ task_points_dict = {
     63: 3,
 }
 
+team_sheets_column_dict = {
+    # value must be int, not char
+    "Test Bingo Team": 6,
+    "Cheese Cape": 7,
+    "Sasa Loves Bingo": 8,
+    "Drunk Chinchompa": 9,
+    "Starship Enterprise": 10
+}
+
 # Discord role IDs
 bingo_teams = [1262935908777332757]
 
 
 # Checks if task id is out of bounds (1 <= task_id <= num_tasks)
 # Tested good 16 Jul 2024
-def check_task_id(task_no) -> bool:
+def check_task_id(task_no: int) -> bool:
     if task_no <= 0:
         print("ERROR: Task submission failed, task id out of bounds. (less than zero)")
         return False
@@ -159,3 +175,12 @@ def get_user_team(roles: list) -> str:
         for role in roles:
             if team_id == role.id:
                 return role.name
+
+
+def is_admin(ctx: discord.ext.commands.Context) -> bool:
+    roles = []
+    for role in ctx.author.roles:
+        roles.append(role.id)
+    if BINGO_ADMIN not in roles:
+        return False
+    return True

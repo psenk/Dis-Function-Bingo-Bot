@@ -9,10 +9,27 @@ import discord.ext
 
 
 class SubmitTool(discord.ui.View):
-    def __init__(self):
+    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID):
+        """
+        param: Discord Context object
+        param: Discord TextChannel object
+        param int: bingo task number
+        param string: bingo team name
+        param boolean: multiple submissions
+        param uuid: uuid number of submission
+        description: Constructor for SubmitTool
+        return: None
+        """
         super().__init__(timeout=None)
+        self.ctx = ctx
+        self.logs_channel = logs_channel
+        self.task_id = task_id
+        self.team = team
+        self.multi = multi
+        self.uuid_no = uuid_no
+        self.message = None
 
-    async def create_submit_tool_embed(ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID) -> None:
+    async def create_submit_tool_embed(self) -> None:
         """
         param: Discord Context object
         param: Discord TextChannel object
@@ -23,32 +40,34 @@ class SubmitTool(discord.ui.View):
         description: posts submission tool embed
         return: None
         """
-        description: str = f"""You are attempting to submit Task #{task_id}: {Util.task_number_dict.get(task_id)} for the Team: {team}. Is this correct?\n
+        description: str = f"""You are attempting to submit: **Task #{self.task_id}\n{Util.task_number_dict.get(self.task_id)}**\nfor the Team: **{self.team}**.\nIs this correct?\n
         Please ensure your submission contains:\n
         1. The bingo codeword\n2. The key item in view\n3. Chat notification (if applicable)"""
 
         submit_tool = discord.Embed(title=f"Bingo Tile Submission Tool", color=0x0000FF, description=description)
         submit_tool.set_author(name="Dis Function's Bingo Bonanza")
-        submit_tool.set_image(url=ctx.message.attachments[0].url)
-        submit_tool.set_footer(text=uuid_no)
+        submit_tool.set_image(url=self.ctx.message.attachments[0].url)
+        submit_tool.set_footer(text=self.uuid_no)
+        
+        self.message = await self.ctx.send(embed=submit_tool, view=self)
 
-        # Buttons
-        class SubmissionButtons(discord.ui.View):
-            @discord.ui.button(label="Submit", style=discord.ButtonStyle.green)
-            async def submit_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-                timestamp = datetime.datetime.now().strftime("%Y-%m-%d at %H:%M:%S")
-                await ctx.send("Sending submission to bingo admins...", delete_after=3.0)
-                await ctx.send(f"Submission for Task #{task_id}: {Util.task_number_dict.get(task_id)} sent by {ctx.author.display_name} on {timestamp}.")
-                await QueryTool.submit_task(task_id, ctx.author.display_name, team, uuid_no, ctx.message.jump_url, ctx.message.id)
-                await LogTool.create_log_embed(ctx, logs_channel, multi, team, task_id, timestamp, uuid_no)
-                await interaction.response.edit_message(view=None)
-                await message.delete()
-                print(f"{ctx.author.display_name} has submitted a task, UUID {uuid_no[:6]}.")
 
-            @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
-            async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-                await ctx.send("Submission cancelled.", delete_after=3.0)
-                await interaction.response.defer()
-                await message.delete()
+    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green)
+    async def submit_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        d = datetime.datetime.now()
+        timestamp = d.strftime("%Y-%m-%d at %H:%M:%S")
+        await self.ctx.send("Sending submission to bingo admins...", delete_after=3.0)
+        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.task_number_dict.get(self.task_id)} sent by {self.ctx.author.display_name} on {timestamp}.")
+        await QueryTool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, self.ctx.message.id)
+        log_tool = LogTool(self.ctx, self.logs_channel, self.multi, self.team, self.task_id, d, self.uuid_no)
+        await log_tool.create_log_embed()
+        await interaction.response.edit_message(view=None)
+        await self.message.delete()
+        print(f"{self.ctx.author.display_name} has submitted a task, UUID {self.uuid_no.__str__()[:6]}.")
 
-        message = await ctx.send(embed=submit_tool, view=SubmissionButtons())
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+    async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await self.ctx.send("Submission cancelled.", delete_after=3.0)
+        await interaction.response.defer()
+        await self.message.delete()
+

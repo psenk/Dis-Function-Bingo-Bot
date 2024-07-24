@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import discord.ext
 
 load_dotenv(override=True)
+from QueryTool import QueryTool
 import Util
 from ApproveTool import ApproveTool
 from SubmitTool import SubmitTool
@@ -27,6 +28,8 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
 handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mode="w")
 
+
+# ! TODO: help embed
 
 @bot.command()
 async def butt(ctx: discord.ext.commands.Context) -> None:
@@ -61,13 +64,17 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if len(cmd) == 1:
         await ctx.send("No bingo task number detected with post.")
         return
+    
     task_id: int = int(cmd[1])
     task_id_check: bool = Util.check_task_id(task_id)
     # task no out of bounds error
     if not task_id_check:
         await ctx.send("Your task ID is out of bounds.")
         return
-
+    day = await QueryTool.get_day()
+    if task_id > day * 9:
+        await ctx.send("This task is not available yet!")
+        return
     screenshots: list = ctx.message.attachments
     # no screenshots error
     if not screenshots:
@@ -77,9 +84,10 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
 
     team: str = Util.get_user_team(ctx.author.roles)
 
-    # create submission embed
     uuid_no = uuid.uuid1()
-    await SubmitTool.create_submit_tool_embed(ctx, bot.get_channel(LOGS_CHANNEL), task_id, team, multi, uuid_no)
+    # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
+    submit_tool = SubmitTool(ctx, bot.get_channel(LOGS_CHANNEL), task_id, team, multi, uuid_no)
+    await submit_tool.create_submit_tool_embed()
 
 
 @bot.command()
@@ -89,9 +97,72 @@ async def approve(ctx: discord.ext.commands.Context) -> None:
     description: Prints list of tasks that require submission
     return: None
     """
-    approve_tool = ApproveTool(ctx)
+    approve_tool = ApproveTool(ctx, bot)
     await approve_tool.create_approve_embed()
 
+
+@bot.command()
+async def ranch(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord Context object
+    description: Sends Ram Ranch team photo
+    return: None
+    """
+    await ctx.send("https://tinyurl.com/3ab8ptjt")
+
+
+@bot.command()
+async def day(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord Context object
+    description: updates day of bingo
+    return: None
+    """
+    cmd: list = ctx.message.content.split()
+    if len(cmd) == 1:
+        await ctx.send("No bingo task number detected with post.")
+        return
+    day = cmd[1]
+    await QueryTool.update_day(day)
+    await QueryTool.get_day()
+    await ctx.send(f"Day of bingo updated to: {day}")
+
+
+@bot.command()
+async def helpme(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord Context object
+    description: Shows list of commands available to normal users
+    return: None
+    """
+    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF
+    )
+    help_embed.add_field(name="!bingohelpme", value="Shows a list of bot commands.", inline=True)
+    help_embed.add_field(name="!bingosubmit X", value="Submit bingo task X to bingo admin team.", inline=True)
+    help_embed.add_field(name="", value="", inline=True)
+    help_embed.add_field(name="!bingoranch", value="Ram Ranch Really Rocks!", inline=True)
+    help_embed.add_field(name="!bingobutt", value="Bingo butt!", inline=True)
+    help_embed.add_field(name="", value="", inline=True)
+    
+    await ctx.send(embed=help_embed)
+    
+@bot.command()
+async def helpadmin(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord Context object
+    description: Shows list of commands available to admin users
+    return: None
+    """
+    if not Util.is_admin(ctx):
+        await ctx.send("You are not authorized to use this command!")
+        return
+    help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF
+    )
+    help_embed.add_field(name="!bingoapprove", value="Shows interactive window for approving bingo submissions.", inline=True)
+    help_embed.add_field(name="!bingoday X", value="Sets the day of the bingo to X.", inline=True)
+    help_embed.add_field(name="", value="", inline=True)
+    
+    await ctx.send(embed=help_embed)
 
 @bot.event
 async def on_ready() -> None:

@@ -23,7 +23,6 @@ class QueryTool:
         print(f"Connected to database for: {task}.")
         return connection
 
-    # Sends task to submissions table
     async def submit_task(task_id: int, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: int) -> None:
         """
         param int: id # of bingo task
@@ -42,7 +41,6 @@ class QueryTool:
         await connection.close()
         print("Database connection closed.")
 
-    # Deletes task
     async def delete_submission(task_id: int, team: str) -> None:
         """
         param int: id # of bingo task
@@ -81,3 +79,36 @@ class QueryTool:
         await connection.close()
         print("Database connection closed.")
         return return_list
+
+    async def update_day(day: int) -> None:
+        """
+        param int: day of bingo
+        description: Update day of bingo
+        return: None
+        """
+        connection = await QueryTool.connect_to_db("update bingo day")
+        query = f"UPDATE settings SET bingo_day = {day}"
+        
+        await connection.execute(query)
+        await connection.close()
+        print("Database connection closed.")
+        
+    async def get_day() -> int:
+        """
+        description: Get bingo day
+        return int: bingo day
+        """
+        connection = await QueryTool.connect_to_db("get bingo day")
+        tx = connection.transaction()
+        await tx.start()
+        try:
+            query = f"SELECT bingo_day FROM settings"
+            cursor = await connection.cursor(query)
+            list = await cursor.fetch(1)
+        except:
+            await tx.rollback()
+            print("EXCEPTION: get_day")
+        else:
+            await tx.commit()
+        print("Database connection closed.")
+        return list[0].get('bingo_day')
