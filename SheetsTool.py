@@ -24,7 +24,7 @@ class SheetsTool():
         description: Creates Google API Client object
         return: Client object
         """
-        return gspread.service_account(filename='docs\\bingobonanza-b9bddbaa451d.json').open_by_key('1NTA9T3I_zaln0foXbCULhw7WVzunyPbNfafpEjwnjiU')
+        return gspread.service_account(filename='bingobonanza-b9bddbaa451d.json').open_by_key('1NTA9T3I_zaln0foXbCULhw7WVzunyPbNfafpEjwnjiU')
     
     def update_sheets(self) -> None:
         """
