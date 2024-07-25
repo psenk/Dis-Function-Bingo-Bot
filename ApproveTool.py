@@ -1,4 +1,3 @@
-import datetime
 import discord
 
 import discord.ext
@@ -9,14 +8,6 @@ from SheetsTool import SheetsTool
 import Util
 
 # GUILD_ID = 741153043776667658 # ! LIVE CODE
-TEST_GUILD_ID = 969399636995493899
-TEST_SUBMISSION_CHANNEL = {
-    "Test Bingo Team": 986537383250001940, 
-    "Starship Enterprise": 986537383250001940, 
-    "Cheese Cape": 986537383250001940,
-    "Sasa Loves Bingo": 986537383250001940,
-    "Drunk Chinchompa": 986537383250001940,
-    }
 
 
 class ApproveTool(discord.ui.View):
@@ -32,6 +23,8 @@ class ApproveTool(discord.ui.View):
         # submission_id, task_id, player, team, uuid_no, jump_url, message_id, date_submitted
         self.submissions = []
         self.page = 0
+        self.purple = None
+        self.uuid = None
 
     async def create_approve_embed(self) -> None:
         """
@@ -53,6 +46,8 @@ class ApproveTool(discord.ui.View):
         return: Discord Embed object
         """
         submission = self.submissions[self.page]
+        self.uuid = submission.get("uuid")
+        self.purple = submission.get("purple")
         approve_tool = discord.Embed(
             title=f"Submission Approval Tool",
             color=0x0000FF,
@@ -75,6 +70,7 @@ class ApproveTool(discord.ui.View):
         approve_tool.add_field(name="Task ID:", value=f"{submission.get('task_id')}", inline=True)
         approve_tool.add_field(name="Task:", value=f"{Util.TASK_NUMBER_DICT[submission.get('task_id')]}", inline=True)
         approve_tool.add_field(name="", value="", inline=True)
+        approve_tool.set_footer(text=self.uuid)
 
         return approve_tool
 
@@ -95,28 +91,35 @@ class ApproveTool(discord.ui.View):
         self.page -= 1
         new_embed = await self.populate_embed()
         self.update_buttons()
-        await interaction.followup.edit_message(embed=new_embed, view=self, message_id=interaction.message.id)
+        await interaction.message.edit(embed=new_embed, view=self)
 
     @discord.ui.button(label="Approve", style=discord.ButtonStyle.green, custom_id="approve_task")
     async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         submission = self.submissions[self.page]
         task_id = submission.get("task_id")
         await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{task_id}: {Util.TASK_NUMBER_DICT.get(task_id)} has been approved!")
+        if task_id == 998:
+            await self.ctx.send(f"Bonus submission has been approved!")
+        else:
+            await self.ctx.send(f"Submission for Task #{task_id}: {Util.TASK_NUMBER_DICT.get(task_id)} has been approved!")
         msg = await ApproveTool.get_message(self.bot, submission.get("message_id"), submission.get("team"))
         await msg.add_reaction("✅")
         self.submissions.pop(self.page)
         if self.page >= len(self.submissions):
             self.page -= 1
         self.update_buttons()
-        await QueryTool.delete_submission(task_id, submission.get("team"))
-        sheets_tool = SheetsTool(submission.get("team"), submission.get("date_submitted"), submission.get("player"), submission.get("task_id"))
-        sheets_tool.update_sheets()
+        await QueryTool.delete_submission(self.uuid.__str__())
+        if task_id == 998:
+            sheets_tool = SheetsTool(submission.get("team"), submission.get("date_submitted"), submission.get("player"), submission.get("task_id"), self.purple)
+            sheets_tool.add_purple(submission.get("player"))
+        else:
+            sheets_tool = SheetsTool(submission.get("team"), submission.get("date_submitted"), submission.get("player"), submission.get("task_id"))
+            sheets_tool.update_sheets()
         if self.submissions:
             new_embed = await self.populate_embed()
-            await interaction.followup.edit_message(embed=new_embed, view=self, message_id=interaction.message.id)
+            await interaction.message.edit(embed=new_embed, view=self)
         else:
-            await interaction.followup.edit_message(content="No more submissions to review.", embed=None, view=None, message_id=interaction.message.id)
+            await interaction.message.edit(content="No more submissions to review.", embed=None, view=None)
 
     @discord.ui.button(label="Reject", style=discord.ButtonStyle.red, custom_id="reject_task")
     async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -130,12 +133,12 @@ class ApproveTool(discord.ui.View):
         if self.page >= len(self.submissions):
             self.page -= 1
         self.update_buttons()
-        await QueryTool.delete_submission(task_id, submission.get("team"))
+        await QueryTool.delete_submission(self.uuid.__str__())
         if self.submissions:
             new_embed = await self.populate_embed()
-            await interaction.followup.edit_message(embed=new_embed, view=self)
+            await interaction.message.edit(embed=new_embed, view=self)
         else:
-            await interaction.followup.edit_message(content="No more submissions to review.", embed=None, view=None)
+            await interaction.message.edit(content="No more submissions to review.", embed=None, view=None)
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.blurple, custom_id="right_task")
     async def right_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -143,7 +146,7 @@ class ApproveTool(discord.ui.View):
         self.page += 1
         new_embed = await self.populate_embed()
         self.update_buttons()
-        await interaction.followup.edit_message(embed=new_embed, view=self, message_id=interaction.message.id)
+        await interaction.message.edit(embed=new_embed, view=self)
 
     async def get_message(bot: discord.ext.commands.Bot, message_id: int, team: str) -> discord.Message:
         """
@@ -153,7 +156,7 @@ class ApproveTool(discord.ui.View):
         description: retrieves specific message from team channel
         return: Discord Message object
         """
-        guild = bot.get_guild(TEST_GUILD_ID)
-        ch = guild.get_channel(TEST_SUBMISSION_CHANNEL.get(team))
+        guild = bot.get_guild(Util.TEST_GUILD_ID)
+        ch = guild.get_channel(Util.TEST_SUBMISSION_CHANNELS.get(team))
         msg = await ch.fetch_message(message_id)
         return msg

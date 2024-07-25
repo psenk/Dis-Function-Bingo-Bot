@@ -18,6 +18,8 @@ class LogTool(discord.ui.View):
         task_id: int,
         timestamp: datetime.datetime,
         uuid_no: uuid.UUID,
+        purple: str = None,
+        player: str = None
     ):
         """
         param: Discord Context object
@@ -39,6 +41,8 @@ class LogTool(discord.ui.View):
         self.timestamp = timestamp
         self.uuid_no = uuid_no
         self.message = None
+        self.purple = purple
+        self.player = player
 
     async def create_log_embed(self) -> None:
         """
@@ -77,11 +81,15 @@ class LogTool(discord.ui.View):
         await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been approved!")
         await self.message.add_reaction("✅")
         await self.ctx.message.add_reaction("✅")
-        sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id)
-        sheets_tool.update_sheets()
-        await QueryTool.delete_submission(self.task_id, self.team)
+        if self.task_id == 998:
+            sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id, self.purple)
+            sheets_tool.add_purple(self.player)
+        else:
+            sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id)
+            sheets_tool.update_sheets()
+        await QueryTool.delete_submission(self.uuid_no.__str__())
         print(f"Task {self.uuid_no.__str__()[:6]} has been approved by the bingo admins.")
-        await interaction.followup.edit_message(view=None, message_id=interaction.message.id)
+        await interaction.message.edit(view=None)
 
     @discord.ui.button(label="Reject", style=discord.ButtonStyle.red)
     async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -89,6 +97,6 @@ class LogTool(discord.ui.View):
         await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been rejected!")
         await self.message.add_reaction("❌")
         await self.ctx.message.add_reaction("❌")
-        await QueryTool.delete_submission(self.task_id, self.team)
+        await QueryTool.delete_submission(self.uuid_no.__str__())
         print(f"Task {self.uuid_no.__str__()[:6]} has been rejected by the bingo admins.")
-        await interaction.followup.edit_message(view=None, message_id=interaction.message.id)
+        await interaction.message.edit(view=None)

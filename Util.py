@@ -6,15 +6,15 @@ import discord.ext.commands
 BINGO_ADMIN = 1265728711731183759
 
 TASK_NUMBER_DICT = {
-    1: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
-    2: "Get a purple!",
-    3: "Complete the \"Back in my Day\" Combat Task",
-    4: "Bring a learner through a first clear Hard Mode",
-    5: "Complete a set of Justiciar",
-    6: "Complete a deathless Hard Mode with at least 5 team members",
-    7: "Complete the \"Personal Space\" Combat Achievement",
-    8: "Obtain a Holy Ornament Kit and a Sanguine Ornament Kit",
-    9: "Get Lil' Zik",
+    1: "Get any good purple (No Prayer Scrolls)",
+    2: "Get 5 Prayer Scrolls",
+    3: "Complete the \"Kill it with Fire\" Combat Task",
+    4: "Complete the \"Perfect Olm\" Combat Task",
+    5: "Obtain a complete set of Ancestral",
+    6: "Make a Kodai Wand from scratch",
+    7: "Complete a 5-Scale Challenge Mode in 25 minutes or less",
+    8: "Get a Twisted Recolor Kit",
+    9: "Get the Metamorphic Dust",
     10: "Get a 5m+ PK at the Chaos Altar",
     11: "Complete 100 Laps of the Wildy Agility Course in 1 session, without banking",
     12: "Win a game of LMS",
@@ -60,15 +60,16 @@ TASK_NUMBER_DICT = {
     52: "Obtain a Draconic, Skeletal, or Wyvern Visage",
     53: "Get 1 unique from each of the 4 God Wars Generals (No Sword Shards)",
     54: "Complete A Voidwaker from scratch",
-    55: "Get any good purple (No Prayer Scrolls)",
-    56: "Get 5 Prayer Scrolls",
-    57: "Complete the \"Kill it with Fire\" Combat Task",
-    58: "Complete the \"Perfect Olm\" Combat Task",
-    59: "Obtain a complete set of Ancestral",
-    60: "Make a Kodai Wand from scratch",
-    61: "Complete a 5-Scale Challenge Mode in 25 minutes or less",
-    62: "Get a Twisted Recolor Kit",
-    63: "Get the Metamorphic Dust",
+    55: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
+    56: "Get a purple!",
+    57: "Complete the \"Back in my Day\" Combat Task",
+    58: "Bring a learner through a first clear Hard Mode",
+    59: "Obtain a complete set of Justiciar",
+    60: "Complete a deathless Hard Mode with at least 5 team members",
+    61: "Complete the \"Personal Space\" Combat Achievement",
+    62: "Obtain a Holy Ornament Kit and a Sanguine Ornament Kit",
+    63: "Get Lil' Zik",
+    998: "Bonus Task",
     999: "Test Task"
 }
 
@@ -162,9 +163,17 @@ COX_PURPLES = [
     "Twisted bow"
 ]
 
-# Discord role IDs
-bingo_teams = [1262935908777332757]
+BINGO_TEAMS_IDS = [1262935908777332757]
+BINGO_TEAMS_STRS = ["Sasa Loves Bingo"]
 
+TEST_GUILD_ID = 969399636995493899
+TEST_SUBMISSION_CHANNELS = {
+    "Test Bingo Team": 986537383250001940, 
+    "Starship Enterprise": 986537383250001940, 
+    "Cheese Cape": 986537383250001940,
+    "Sasa Loves Bingo": 986537383250001940,
+    "Drunk Chinchompa": 986537383250001940,
+    }
 
 # Checks if task id is out of bounds (1 <= task_id <= num_tasks)
 # Tested good 16 Jul 2024
@@ -186,7 +195,7 @@ def check_screenshots(screenshots) -> bool:
 # Gets users bingo team
 # Tested good 19 Jul 2024
 def get_user_team(roles: list) -> str:
-    for team_id in bingo_teams:
+    for team_id in BINGO_TEAMS_IDS:
         for role in roles:
             if team_id == role.id:
                 return role.name

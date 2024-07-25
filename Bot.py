@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import logging
 import os
 import random
@@ -10,6 +10,7 @@ from discord.ext import commands
 import discord.ext.commands
 from dotenv import load_dotenv
 
+from LogTool import LogTool
 from SheetsTool import SheetsTool
 
 load_dotenv(override=True)
@@ -41,6 +42,7 @@ async def butt(ctx: discord.ext.commands.Context) -> None:
     return: None
     """
     # await ctx.send("http://tinyurl.com/s8aw585y")
+    print(f"Butt command used by: {ctx.author}")
     word = ""
     for i in "bingobutt":
         val = random.randint(0, 5)
@@ -54,43 +56,103 @@ async def butt(ctx: discord.ext.commands.Context) -> None:
 
 
 @bot.command()
+async def ranch(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord Context object
+    description: Sends Ram Ranch team photo
+    return: None
+    """
+    print(f"Ranch command used by: {ctx.author}")
+    await ctx.send("https://tinyurl.com/3ab8ptjt")
+
+
+@bot.command()
 async def submit(ctx: discord.ext.commands.Context) -> None:
     """
     param: Discord context object
     description: Submits task for approval
     return: None
     """
-    cmd: list = ctx.message.content.split()
+    print(f"Submit command used by: {ctx.author}")
+    # ! TODO: command can only be run in users team channel
+
+    cmd = ctx.message.content.split()
     if len(cmd) == 1:
         await ctx.send("No bingo task number detected with post.")
         return
 
+    team: str = Util.get_user_team(ctx.author.roles)
+    if team not in Util.BINGO_TEAMS_STRS:
+        await ctx.send("You are not authorized to use this command!")
+        return
+    
+    screenshots: list = ctx.message.attachments
+    if not screenshots:
+        await ctx.send("No screenshots detected with submission.")
+        return
+    
+    # submit purple for joe award
     if cmd[1] == "bonus":
-        team: str = Util.get_user_team(ctx.author.roles)
+        
+        # ! TODO: delete all messages made
+        print(f"Bonus command by: {ctx.author}")
+        date_format = "%m-%d-%y"
+        time_format = "%H:%M"
+
         bonus_view = BonusTool()
         await ctx.send("Select a purple from the dropdown menu:", view=bonus_view)
         await bonus_view.wait()
         purple = bonus_view.purp
         
-        await ctx.send("Please enter the date listed on the Clan Events plugin in the screenshot below.\nUse the following format: MM-DD-YY\nExample: **08-16-91**")
-        date = await bot.wait_for("message")
-        
-        await ctx.send("Please enter the time listed on the Clan Events plugin in the screenshot below.\nUse the following format: HH:MM:SS PM\nExample: **10:52:01 AM**")        
-        time = await bot.wait_for("message")
-        
-        await ctx.send("Please enter the name of the player that obtained the drop below.")
-        player = await bot.wait_for("message")
-        
+        # get the date
+        while True:
+            await ctx.send("Find the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**")
+            date_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+            if date_msg.content.lower() == "no":
+                await ctx.send("Bonus submission canceled.")
+                return
+            try:
+                date = datetime.strptime(date_msg.content, date_format).date()
+                break
+            except ValueError:
+                await ctx.send(f"Date format not accepted.  Please try again, or type 'No' to cancel submission.")
+
+        # get the time
+        while True:
+            await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**")
+            time_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+            if time_msg.content.lower() == "no":
+                await ctx.send("Bonus submission canceled.")
+                return
+            try:
+                time = datetime.strptime(time_msg.content, time_format).time()
+                break
+            except ValueError:
+                await ctx.send("Time format not accepted.  Please try again, or type 'No' to cancel submission.")
+
+        await ctx.send("Enter the name of the player that obtained the drop below.")
+        player_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+        if player_msg.content.lower() == "no":
+            await ctx.send("Bonus submission canceled.")
+            return
+
+        # confirm submission details
         confirm_view = ConfirmTool()
-        await ctx.send(f"Player **{player.content.strip()}** obtained a **{purple}** for team **{team}** on **{date.content.strip()}** at **{time.content.strip()}**.  Does this all look correct?", view=confirm_view)
+        await ctx.send(f"Player **{player_msg.content.strip()}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?", view=confirm_view)
         await confirm_view.wait()
-        
-        if confirm_view.confirm == "No":
+
+        # handle confirmation response
+        if confirm_view.confirm.lower() == "no":
             await ctx.send("Bonus submission cancelled.")
             return
         else:
+            uuid_bonus = uuid.uuid1()
+            date_bonus = datetime.combine(date, time)
+            print(f"Date bonus: {date_bonus}")
+            await QueryTool.submit_task(998, player_msg.content, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
+            log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus, purple, player_msg.content)
+            await log_tool.create_log_embed()
             await ctx.send("Your bonus submission has been sent to the bingo admin team.")
-            SheetsTool.add_purple(purple, team, date.content, time.content, player.content)
             return
 
     task_id: int = int(cmd[1])
@@ -103,15 +165,8 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if task_id > day * 9:
         await ctx.send("This task is not available yet!")
         return
-    screenshots: list = ctx.message.attachments
-    # no screenshots error
-    if not screenshots:
-        await ctx.send("No screenshots detected with submission.")
-        return
 
     multi: bool = len(screenshots) > 1
-
-    team: str = Util.get_user_team(ctx.author.roles)
 
     uuid_no = uuid.uuid1()
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
@@ -126,18 +181,9 @@ async def approve(ctx: discord.ext.commands.Context) -> None:
     description: Prints list of tasks that require submission
     return: None
     """
+    print(f"Approve command used by: {ctx.author}")
     approve_tool = ApproveTool(ctx, bot)
     await approve_tool.create_approve_embed()
-
-
-@bot.command()
-async def ranch(ctx: discord.ext.commands.Context) -> None:
-    """
-    param: Discord Context object
-    description: Sends Ram Ranch team photo
-    return: None
-    """
-    await ctx.send("https://tinyurl.com/3ab8ptjt")
 
 
 @bot.command()
@@ -147,6 +193,7 @@ async def day(ctx: discord.ext.commands.Context) -> None:
     description: updates day of bingo
     return: None
     """
+    print(f"Day command used by: {ctx.author}")
     cmd: list = ctx.message.content.split()
     if len(cmd) == 1:
         await ctx.send("No bingo task number detected with post.")
@@ -164,9 +211,10 @@ async def helpme(ctx: discord.ext.commands.Context) -> None:
     description: Shows list of commands available to normal users
     return: None
     """
+    print(f"HelpMe command used by: {ctx.author}")
     help_embed = discord.Embed(title="Bingo Bonanza Bot Commands", color=0x0000FF)
     help_embed.add_field(name="!bingohelpme", value="Shows a list of bot commands.", inline=True)
-    help_embed.add_field(name="!bingosubmit X", value="Submit bingo task X to bingo admin team.", inline=True)
+    help_embed.add_field(name="!bingosubmit X", value="Submit bingo task X to bingo admin team.\nUse '!bingosubmit bonus' to submit a purple for the Twisted Joe Award.", inline=True)
     help_embed.add_field(name="", value="", inline=True)
     help_embed.add_field(name="!bingoranch", value="Ram Ranch Really Rocks!", inline=True)
     help_embed.add_field(name="!bingobutt", value="Bingo butt!", inline=True)
@@ -182,6 +230,7 @@ async def helpadmin(ctx: discord.ext.commands.Context) -> None:
     description: Shows list of commands available to admin users
     return: None
     """
+    print(f"HelpAdmin command used by: {ctx.author}")
     if not Util.is_admin(ctx):
         await ctx.send("You are not authorized to use this command!")
         return
@@ -193,6 +242,34 @@ async def helpadmin(ctx: discord.ext.commands.Context) -> None:
     await ctx.send(embed=help_embed)
 
 
+@bot.command()
+async def task(ctx: discord.ext.commands.Context, task_id: int) -> None:
+    """
+    param: Discord Context object
+    param int: bingo task number
+    description: prints bingo task
+    return: None
+    """
+    print(f"Task command used by: {ctx.author}")
+    task_id = ctx.message.content.split()[1].strip()
+    if not Util.is_admin(ctx):
+        await ctx.send("You are not authorized to use this command!")
+        return
+    await ctx.send(f"Task # {task_id}: {Util.TASK_NUMBER_DICT.get(task_id.__int__())}")
+
+
+@bot.command()
+@commands.is_owner()
+async def kill(ctx: discord.ext.commands.Context) -> None:
+    """
+    param: Discord context object
+    description: Closes the bot
+    return: None
+    """
+    await ctx.send("Later nerds.")
+    await bot.close()
+
+
 @bot.event
 async def on_ready() -> None:
     """
@@ -200,8 +277,8 @@ async def on_ready() -> None:
     description: This code runs every time the bot boots up
     return: None
     """
-    # LOG
-    print(f"Bingo Bot online as of {datetime.datetime.now()}.")
+    await bot.get_channel(LOGS_CHANNEL).send("Cowabunga nerds!")
+    print(f"Bingo Bot online as of {datetime.now()}.")
 
 
 bot.run(DISCORD_TOKEN, log_handler=handler, log_level=logging.DEBUG)

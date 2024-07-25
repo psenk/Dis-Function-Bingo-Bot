@@ -42,7 +42,7 @@ class SubmitTool(discord.ui.View):
         """
         description: str = f"""You are attempting to submit: **Task #{self.task_id}\n{Util.TASK_NUMBER_DICT.get(self.task_id)}**\nfor the Team: **{self.team}**.\nIs this correct?\n
         Please ensure your submission contains:\n
-        1. The bingo codeword\n2. The key item in view\n3. Chat notification (if applicable)\n**If this is a Chambers of Xeric purple, please use command '!bingosubmit {self.task_id} bonus'**"""
+        1. The bingo codeword\n2. The key item in view\n3. Chat notification (if applicable)"""
 
         submit_tool = discord.Embed(title=f"Bingo Tile Submission Tool", color=0x0000FF, description=description)
         submit_tool.set_author(name="Dis Function's Bingo Bonanza")
