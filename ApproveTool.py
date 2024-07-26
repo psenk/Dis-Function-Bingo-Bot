@@ -30,6 +30,7 @@ class ApproveTool(discord.ui.View):
         self.query_tool = query_tool
         
     @classmethod
+    # class is being passed into function, replacing self
     async def create(c, ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot) -> 'ApproveTool':
         """
         Async method to create ApproveTool instance
@@ -37,9 +38,13 @@ class ApproveTool(discord.ui.View):
         param: Discord Bot object
         return: Instance of ApproveTool
         """
+        # create the querytool
         query_tool = QueryTool()
+        # handle async communications
         async with query_tool as tool:
+            # create the approvaltool
             instance = c(ctx, bot, tool)
+            # create initial embed
             await instance.create_approve_embed()
             return instance
 

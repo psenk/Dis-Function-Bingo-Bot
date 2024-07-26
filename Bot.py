@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import logging
 import os
@@ -105,55 +106,35 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
         await bonus_view.wait()
         purple = bonus_view.purp
         
-        # get the date
-        while True:
-            await ctx.send("Find the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**")
-            date_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-            if date_msg.content.lower() == "no":
-                await ctx.send("Bonus submission canceled.")
-                return
-            try:
-                date = datetime.strptime(date_msg.content, date_format).date()
-                break
-            except ValueError:
-                await ctx.send(f"Date format not accepted.  Please try again, or type 'No' to cancel submission.")
-
-        # get the time
-        while True:
-            await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**")
-            time_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-            if time_msg.content.lower() == "no":
-                await ctx.send("Bonus submission canceled.")
-                return
-            try:
-                time = datetime.strptime(time_msg.content, time_format).time()
-                break
-            except ValueError:
-                await ctx.send("Time format not accepted.  Please try again, or type 'No' to cancel submission.")
-
-        await ctx.send("Enter the name of the player that obtained the drop below.")
-        player_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-        if player_msg.content.lower() == "no":
+        # get the date, time, player info
+        date_task = asyncio.create_task(Util.prompt_for_date(ctx, bot, date_format))
+        time_task = asyncio.create_task(Util.prompt_for_time(ctx, bot, time_format))
+        player_task = asyncio.create_task(Util.prompt_for_player(ctx, bot))
+        
+        date, time, player = await asyncio.gather(date_task, time_task, player_task)
+        if date is None or time is None or player is None:
             await ctx.send("Bonus submission canceled.")
             return
+        
+        
 
         # confirm submission details
         confirm_view = ConfirmTool()
-        await ctx.send(f"Player **{player_msg.content.strip()}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?\n", view=confirm_view)
+        await ctx.send(f"Player **{player}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?\n", view=confirm_view)
         await confirm_view.wait()
 
         # handle confirmation response
         if confirm_view.confirm.lower() == "no":
-            await ctx.send("Bonus submission cancelled.")
+            await ctx.send("Bonus submission canceled.")
             return
-        else:
-            uuid_bonus = uuid.uuid1()
-            date_bonus = datetime.combine(date, time)
-            await query_tool.submit_task(998, player_msg.content, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
-            log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
-            await log_tool.create_log_embed()
-            await ctx.send("Your bonus submission has been sent to the bingo admin team.")
-            return
+
+        uuid_bonus = uuid.uuid1()
+        date_bonus = datetime.combine(date, time)
+        await query_tool.submit_task(998, player, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
+        log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
+        await log_tool.create_log_embed()
+        await ctx.send("Your bonus submission has been sent to the bingo admin team.")
+        return
 
     task_id: int = int(cmd[1])
     task_id_check: bool = Util.check_task_id(task_id)

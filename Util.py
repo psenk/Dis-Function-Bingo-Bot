@@ -1,3 +1,4 @@
+from datetime import datetime
 import discord
 
 import discord.ext
@@ -208,3 +209,53 @@ def is_admin(ctx: discord.ext.commands.Context) -> bool:
     if BINGO_ADMIN not in roles:
         return False
     return True
+
+
+async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.Bot, date_format: str) -> datetime.date:
+    """
+    Prompt the user to input a date and validate the format.
+    param: Discord Context instance
+    param: Discord Bot instance
+    param str: datetime string format for date
+    return: datetime.date instance
+    """
+    while True:
+        await ctx.send("Find the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**\nType 'no' to cancel submission.")
+        date_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+        if date_msg.content.lower() == "no":
+            return None
+        try:
+            return datetime.strptime(date_msg.content, date_format).date()
+        except ValueError:
+            await ctx.send(f"Date format not accepted. Please try again using the correct format (MM-DD-YY), or type 'no' to cancel submission.")
+            
+async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.Bot, time_format: str) -> datetime.time:
+    """
+    Prompt the user to input a time and validate the format.
+    param: Discord Context instance
+    param: Discord Bot instance
+    param str: datetime string format for time
+    return: datetime.time instance
+    """
+    while True:
+        await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**\nType 'no' to cancel submission.")
+        time_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+        if time_msg.content.lower() == "no":
+            return None
+        try:
+            return datetime.strptime(time_msg.content, time_format).time()
+        except ValueError:
+            await ctx.send("Time format not accepted. Please try again using the correct format (HH:MM), or type 'no' to cancel submission.")
+
+async def prompt_for_player(ctx: discord.ext.commands.Context, bot: discord.Bot) -> str:
+    """
+    Prompt the user to input a player's name.
+    param: Discord Context instance
+    param: Discord Bot instance
+    return: str
+    """
+    await ctx.send("Enter the name of the player that obtained the drop below.\nType 'no' to cancel submission.")
+    player_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
+    if player_msg.content.lower() == "no":
+        return None
+    return player_msg.content.strip()
