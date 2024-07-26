@@ -141,7 +141,7 @@ TASK_POINTS_DICT = {
 
 TEAMS_SHEETS_COLUMN_DICT = {
     # value must be int, not char
-    "Test Bingo Team": 6,
+    "Godopka Team Name Pending": 6,
     "Cheese Cape": 7,
     "Sasa Loves Bingo": 8,
     "Drunk Chinchompa": 9,
@@ -164,11 +164,11 @@ COX_PURPLES = [
 ]
 
 BINGO_TEAMS_IDS = [1262935908777332757]
-BINGO_TEAMS_STRS = ["Sasa Loves Bingo", "Test Bingo Team", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]
+BINGO_TEAMS_STRS = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]
 
 TEST_GUILD_ID = 969399636995493899
 TEST_SUBMISSION_CHANNELS = {
-    "Test Bingo Team": 986537383250001940, 
+    "Godopka Team Name Pending": 986537383250001940, 
     "Starship Enterprise": 986537383250001940, 
     "Cheese Cape": 986537383250001940,
     "Sasa Loves Bingo": 986537383250001940,
