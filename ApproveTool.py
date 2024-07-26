@@ -11,7 +11,7 @@ import Util
 
 
 class ApproveTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot, query_tool: QueryTool):
+    def __init__(self, ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot):
         """
         ApprovalTool Constructor
         param: Discord Context object
@@ -27,33 +27,33 @@ class ApproveTool(discord.ui.View):
         self.page = 0
         self.purple = None
         self.uuid = None
-        self.query_tool = query_tool
         
-    @classmethod
-    # class is being passed into function, replacing self
-    async def create(c, ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot) -> 'ApproveTool':
-        """
+        """     @classmethod
+        # class is being passed into function, replacing self
+        async def create(c, ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot) -> 'ApproveTool':
+        
         Async method to create ApproveTool instance
         param: Discord Context object
         param: Discord Bot object
         return: Instance of ApproveTool
-        """
+        
         # create the querytool
-        query_tool = QueryTool()
         # handle async communications
-        async with query_tool as tool:
+        async with QueryTool() as tool:
             # create the approvaltool
             instance = c(ctx, bot, tool)
             # create initial embed
             await instance.create_approve_embed()
             return instance
+        """
 
     async def create_approve_embed(self) -> None:
         """
         Creates initial embed
         return: None
         """
-        self.submissions = await self.query_tool.get_submissions()
+        async with QueryTool() as query_tool:
+            self.submissions = await query_tool.get_submissions()
         if not self.submissions:
             await self.ctx.send("There are no submissions to approve at this time.")
             return
@@ -117,7 +117,8 @@ class ApproveTool(discord.ui.View):
         if self.page >= len(self.submissions):
             self.page -= 1
         self.update_buttons()
-        await self.query_tool.delete_submission(str(self.uuid))
+        async with QueryTool() as query_tool:
+            await query_tool.delete_submission(str(self.uuid))
         sheets_tool = SheetsTool(submission["team"], submission["date_submitted"], submission["player"], submission["task_id"], self.purple if task_id == 998 else None)
         sheets_tool.add_purple(submission["player"]) if task_id == 998 else sheets_tool.update_sheets()
         if self.submissions:
@@ -138,7 +139,8 @@ class ApproveTool(discord.ui.View):
         if self.page >= len(self.submissions):
             self.page -= 1
         self.update_buttons()
-        await self.query_tool.delete_submission(str(self.uuid))
+        async with QueryTool() as query_tool:
+            await query_tool.delete_submission(str(self.uuid))
         if self.submissions:
             new_embed = await self.populate_embed()
             await interaction.message.edit(embed=new_embed, view=self)

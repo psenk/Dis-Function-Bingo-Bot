@@ -14,23 +14,23 @@ class QueryTool:
     def __init__(self):
         self.pool = None
 
-    async def __aenter__(self) -> None:
+    async def __aenter__(self) -> 'QueryTool':
         """
         Initializes connection pool when entering context (with statement)
         return: None
         """
-        self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=2, max_inactive_connection_lifetime=10.0)
+        self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=10)
         print("Connection pool created.")
         return self
 
-    async def __aexit__(self) -> None:
+    async def __aexit__(self, exc_type, exc, tb) -> None:
         """
         Closes connection pool when exiting context (with statement)
         """
         await self.pool.close()
         print("Connection pool closed.")
 
-    async def submit_task(self, task_id: int, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: int, purple: str = None) -> None:
+    async def submit_task(self, task_id: int, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None) -> None:
         """
         Submits task for approval to the bingo admin team
         param int: id # of bingo task

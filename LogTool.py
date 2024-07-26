@@ -61,33 +61,3 @@ class LogTool(discord.ui.View):
         log_embed.set_footer(text=self.uuid_no)
 
         self.message = await self.logs_channel.send(embed=log_embed, view=self)
-
-    # log tool buttons
-    # add to constructor: purple: str, player: str
-    """
-    @discord.ui.button(label="Approve", style=discord.ButtonStyle.green)
-    async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been approved!")
-        await self.message.add_reaction("✅")
-        await self.ctx.message.add_reaction("✅")
-        if self.task_id == 998:
-            sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id, self.purple)
-            sheets_tool.add_purple(self.player)
-        else:
-            sheets_tool = SheetsTool(self.team, self.timestamp, self.ctx.author.display_name, self.task_id)
-            sheets_tool.update_sheets()
-        await QueryTool.delete_submission(self.uuid_no.__str__())
-        print(f"Task {self.uuid_no.__str__()[:6]} has been approved by the bingo admins.")
-        await interaction.message.edit(view=None)
-
-    @discord.ui.button(label="Reject", style=discord.ButtonStyle.red)
-    async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
-        await interaction.response.defer()
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} has been rejected!")
-        await self.message.add_reaction("❌")
-        await self.ctx.message.add_reaction("❌")
-        await QueryTool.delete_submission(self.uuid_no.__str__())
-        print(f"Task {self.uuid_no.__str__()[:6]} has been rejected by the bingo admins.")
-        await interaction.message.edit(view=None)
-    """

@@ -1,24 +1,23 @@
-import asyncio
-from datetime import datetime
 import logging
 import os
 import random
 import uuid
+from datetime import datetime
 
 import discord
 import discord.ext
-from discord.ext import commands
 import discord.ext.commands
+from discord.ext import commands
 from dotenv import load_dotenv
 
 from LogTool import LogTool
 from SheetsTool import SheetsTool
 
 load_dotenv(override=True)
-from ConfirmTool import ConfirmTool
 import Util
 from ApproveTool import ApproveTool
 from BonusTool import BonusTool
+from ConfirmTool import ConfirmTool
 from QueryTool import QueryTool
 from SubmitTool import SubmitTool
 
@@ -86,41 +85,37 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if team not in Util.BINGO_TEAMS_STRS:
         await ctx.send("You are not authorized to use this command!")
         return
-    
+
     screenshots: list = ctx.message.attachments
     if not screenshots:
         await ctx.send("No screenshots detected with submission.")
         return
-    
+
     query_tool = QueryTool()
     # submit purple for joe award
     if cmd[1] == "bonus":
-        
         # ! TODO: delete all messages made
         print(f"Bonus command used by: {ctx.author}")
         date_format = "%m-%d-%y"
         time_format = "%H:%M"
 
         bonus_view = BonusTool()
-        await ctx.send("Select a purple from the dropdown menu:\n", view=bonus_view)
+        await ctx.send("Select a purple from the dropdown menu:\n_ _", view=bonus_view)
         await bonus_view.wait()
         purple = bonus_view.purp
-        
+
         # get the date, time, player info
-        date_task = asyncio.create_task(Util.prompt_for_date(ctx, bot, date_format))
-        time_task = asyncio.create_task(Util.prompt_for_time(ctx, bot, time_format))
-        player_task = asyncio.create_task(Util.prompt_for_player(ctx, bot))
-        
-        date, time, player = await asyncio.gather(date_task, time_task, player_task)
+        date = await Util.prompt_for_date(ctx, bot, date_format)
+        time = await Util.prompt_for_time(ctx, bot, time_format)
+        player = await Util.prompt_for_player(ctx, bot)
+
         if date is None or time is None or player is None:
             await ctx.send("Bonus submission canceled.")
             return
-        
-        
 
         # confirm submission details
         confirm_view = ConfirmTool()
-        await ctx.send(f"Player **{player}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?\n", view=confirm_view)
+        await ctx.send(f"Player **{player}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?\n_ _", view=confirm_view)
         await confirm_view.wait()
 
         # handle confirmation response
@@ -130,9 +125,10 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
 
         uuid_bonus = uuid.uuid1()
         date_bonus = datetime.combine(date, time)
-        await query_tool.submit_task(998, player, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
-        log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
-        await log_tool.create_log_embed()
+        async with query_tool:
+            await query_tool.submit_task(998, player, team, uuid_bonus, ctx.message.jump_url, str(ctx.message.id), purple)
+            log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
+            await log_tool.create_log_embed()
         await ctx.send("Your bonus submission has been sent to the bingo admin team.")
         return
 
@@ -142,7 +138,8 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if not task_id_check:
         await ctx.send("Your task ID is out of bounds.")
         return
-    day = await query_tool.get_day()
+    async with query_tool:
+        day = await query_tool.get_day()
     if task_id > day * 9:
         await ctx.send("This task is not available yet!")
         return
@@ -159,11 +156,12 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
 async def approve(ctx: discord.ext.commands.Context) -> None:
     """
     param: Discord context object
-    description: Prints list of tasks that require submission
+    description: Prints list of tasks that require approval
     return: None
     """
+    global bot
     print(f"Approve command used by: {ctx.author}")
-    approve_tool = await ApproveTool.create(ctx, bot)
+    approve_tool = ApproveTool(ctx, bot)
     await approve_tool.create_approve_embed()
 
 
@@ -181,7 +179,8 @@ async def day(ctx: discord.ext.commands.Context) -> None:
         await ctx.send("No bingo task number detected with post.")
         return
     day = cmd[1]
-    day = await query_tool.update_day(day)
+    async with query_tool:
+        day = await query_tool.update_day(day)
     await ctx.send(f"Day of bingo updated to: {day}")
 
 

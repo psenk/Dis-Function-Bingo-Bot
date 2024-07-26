@@ -220,7 +220,7 @@ async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.ext.co
     return: datetime.date instance
     """
     while True:
-        await ctx.send("Find the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**\nType 'no' to cancel submission.")
+        await ctx.send("_ _\nFind the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**\n\nType 'no' to cancel submission.")
         date_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
         if date_msg.content.lower() == "no":
             return None
@@ -238,7 +238,7 @@ async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.ext.co
     return: datetime.time instance
     """
     while True:
-        await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**\nType 'no' to cancel submission.")
+        await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**\n\nType 'no' to cancel submission.")
         time_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
         if time_msg.content.lower() == "no":
             return None
@@ -254,7 +254,7 @@ async def prompt_for_player(ctx: discord.ext.commands.Context, bot: discord.ext.
     param: Discord Bot instance
     return: str
     """
-    await ctx.send("Enter the name of the player that obtained the drop below.\nType 'no' to cancel submission.")
+    await ctx.send("Enter the name of the player that obtained the drop below.\n\nType 'no' to cancel submission.")
     player_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
     if player_msg.content.lower() == "no":
         return None

@@ -28,7 +28,6 @@ class SubmitTool(discord.ui.View):
         self.multi = multi
         self.uuid_no = uuid_no
         self.message = None
-        self.query_tool = QueryTool()
 
     async def create_submit_tool_embed(self) -> None:
         """
@@ -59,7 +58,8 @@ class SubmitTool(discord.ui.View):
         timestamp = d.strftime("%Y-%m-%d at %H:%M:%S")
         await self.ctx.send("Sending submission to bingo admins...", delete_after=3.0)
         await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} sent by {self.ctx.author.display_name} on {timestamp}.")
-        await self.query_tool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, self.ctx.message.id)
+        async with QueryTool() as query_tool:
+            await query_tool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id))
         log_tool = LogTool(self.ctx, self.logs_channel, self.multi, self.team, self.task_id, d, self.uuid_no)
         await log_tool.create_log_embed()
         await interaction.response.edit_message(view=None)
