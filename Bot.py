@@ -91,6 +91,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
         await ctx.send("No screenshots detected with submission.")
         return
     
+    query_tool = QueryTool()
     # submit purple for joe award
     if cmd[1] == "bonus":
         
@@ -148,7 +149,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
         else:
             uuid_bonus = uuid.uuid1()
             date_bonus = datetime.combine(date, time)
-            await QueryTool.submit_task(998, player_msg.content, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
+            await query_tool.submit_task(998, player_msg.content, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
             log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
             await log_tool.create_log_embed()
             await ctx.send("Your bonus submission has been sent to the bingo admin team.")
@@ -160,7 +161,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if not task_id_check:
         await ctx.send("Your task ID is out of bounds.")
         return
-    day = await QueryTool.get_day()
+    day = await query_tool.get_day()
     if task_id > day * 9:
         await ctx.send("This task is not available yet!")
         return
@@ -181,7 +182,7 @@ async def approve(ctx: discord.ext.commands.Context) -> None:
     return: None
     """
     print(f"Approve command used by: {ctx.author}")
-    approve_tool = ApproveTool(ctx, bot)
+    approve_tool = await ApproveTool.create(ctx, bot)
     await approve_tool.create_approve_embed()
 
 
@@ -192,14 +193,14 @@ async def day(ctx: discord.ext.commands.Context) -> None:
     description: updates day of bingo
     return: None
     """
+    query_tool = QueryTool()
     print(f"Day command used by: {ctx.author}")
     cmd: list = ctx.message.content.split()
     if len(cmd) == 1:
         await ctx.send("No bingo task number detected with post.")
         return
     day = cmd[1]
-    await QueryTool.update_day(day)
-    await QueryTool.get_day()
+    day = await query_tool.update_day(day)
     await ctx.send(f"Day of bingo updated to: {day}")
 
 
@@ -254,7 +255,7 @@ async def task(ctx: discord.ext.commands.Context, task_id: int) -> None:
     if not Util.is_admin(ctx):
         await ctx.send("You are not authorized to use this command!")
         return
-    await ctx.send(f"Task # {task_id}: {Util.TASK_NUMBER_DICT.get(task_id.__int__())}")
+    await ctx.send(f"Task # {task_id}: {Util.TASK_NUMBER_DICT.get(task_id)}")
 
 
 @bot.command()

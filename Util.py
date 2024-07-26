@@ -164,7 +164,7 @@ COX_PURPLES = [
 ]
 
 BINGO_TEAMS_IDS = [1262935908777332757]
-BINGO_TEAMS_STRS = ["Sasa Loves Bingo"]
+BINGO_TEAMS_STRS = ["Sasa Loves Bingo", "Test Bingo Team", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]
 
 TEST_GUILD_ID = 969399636995493899
 TEST_SUBMISSION_CHANNELS = {

@@ -9,16 +9,7 @@ import Util
 
 
 class LogTool(discord.ui.View):
-    def __init__(
-        self,
-        ctx: discord.ext.commands.Context,
-        logs_channel: discord.TextChannel,
-        multi: bool,
-        team: str,
-        task_id: int,
-        timestamp: datetime.datetime,
-        uuid_no: uuid.UUID,
-    ):
+    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, multi: bool, team: str, task_id: int, timestamp: datetime.datetime, uuid_no: uuid.UUID):
         """
         param: Discord Context object
         param: Discord TextChannel object
