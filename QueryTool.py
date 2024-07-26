@@ -102,14 +102,44 @@ class QueryTool:
         print("Bingo day fetched and connection released.")
         return day
 
+    async def get_teams(self) -> list:
+        """
+        Gets all teams and their info
+        return list: list of teams and their info
+        """
 
-# OLD CODE
-"""
-        async def connect_to_db(task: str) -> asyncpg.Connection:
-        param string: name of task being performed
-        description: connects to the postgres database
-        return: database connection object
-        connection = await asyncpg.connect(CONNECTION_STRING)
-        print(f"Connected to database for: {task}.")
-        return connection
-"""
+        query = "SELECT * FROM teams;"
+
+        async with self.pool.acquire() as connection:
+            teams = await connection.fetch(query)
+        print("Teams retrieved and connection released.")
+        return teams
+    
+    async def get_team(self, team: str) -> list:
+        """
+        Get specific team and their info
+        return list: list of team info
+        """
+
+        query = "SELECT * FROM teams WHERE team_name = $1;"
+
+        async with self.pool.acquire() as connection:
+            teams = await connection.fetch(query, team)
+        print("Team retrieved and connection released.")
+        return teams
+
+    async def update_team_info(self, team: str, col: str, old_data: str, new_data: str) -> None:
+        """
+        Update team info in database
+        param str: name of column
+        param str: old team info
+        param str: new team info
+        return: None
+        """
+        query = f"UPDATE teams SET {col} = $1 WHERE {col} = $2 AND team_name = $3;"
+        print(f"Col: {col}")
+        print(f"Old data: {old_data}, New data: {new_data}")
+        async with self.pool.acquire() as connection:
+            async with connection.transaction():
+                await connection.execute(query, new_data, old_data, team)
+        print(f"Team record updated: {col} -> {new_data}")
