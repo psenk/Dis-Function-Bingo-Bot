@@ -95,12 +95,12 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
     if cmd[1] == "bonus":
         
         # ! TODO: delete all messages made
-        print(f"Bonus command by: {ctx.author}")
+        print(f"Bonus command used by: {ctx.author}")
         date_format = "%m-%d-%y"
         time_format = "%H:%M"
 
         bonus_view = BonusTool()
-        await ctx.send("Select a purple from the dropdown menu:", view=bonus_view)
+        await ctx.send("Select a purple from the dropdown menu:\n", view=bonus_view)
         await bonus_view.wait()
         purple = bonus_view.purp
         
@@ -138,7 +138,7 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
 
         # confirm submission details
         confirm_view = ConfirmTool()
-        await ctx.send(f"Player **{player_msg.content.strip()}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?", view=confirm_view)
+        await ctx.send(f"Player **{player_msg.content.strip()}** obtained a **{purple}** for team **{team}** on **{date}** at **{time}**.  Does this all look correct?\n", view=confirm_view)
         await confirm_view.wait()
 
         # handle confirmation response
@@ -148,9 +148,8 @@ async def submit(ctx: discord.ext.commands.Context) -> None:
         else:
             uuid_bonus = uuid.uuid1()
             date_bonus = datetime.combine(date, time)
-            print(f"Date bonus: {date_bonus}")
             await QueryTool.submit_task(998, player_msg.content, team, uuid_bonus, ctx.message.jump_url, ctx.message.id, purple)
-            log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus, purple, player_msg.content)
+            log_tool = LogTool(ctx, bot.get_channel(LOGS_CHANNEL), False, team, 998, date_bonus, uuid_bonus)
             await log_tool.create_log_embed()
             await ctx.send("Your bonus submission has been sent to the bingo admin team.")
             return

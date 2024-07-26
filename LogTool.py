@@ -1,11 +1,11 @@
 import datetime
+import uuid
+
 import discord
 import discord.ext
 import discord.ext.commands
-from QueryTool import QueryTool
-from SheetsTool import SheetsTool
+
 import Util
-import uuid
 
 
 class LogTool(discord.ui.View):
@@ -18,8 +18,6 @@ class LogTool(discord.ui.View):
         task_id: int,
         timestamp: datetime.datetime,
         uuid_no: uuid.UUID,
-        purple: str = None,
-        player: str = None
     ):
         """
         param: Discord Context object
@@ -41,8 +39,6 @@ class LogTool(discord.ui.View):
         self.timestamp = timestamp
         self.uuid_no = uuid_no
         self.message = None
-        self.purple = purple
-        self.player = player
 
     async def create_log_embed(self) -> None:
         """
@@ -65,16 +61,19 @@ class LogTool(discord.ui.View):
 
         # log_embed(name="Submission Link", url=ctx.message.jump_url)
         log_embed.set_thumbnail(url=self.ctx.message.attachments[0].url)
-        log_embed.set_footer(text=self.uuid_no)
         log_embed.add_field(name="Team:", value=self.team, inline=True)
         log_embed.add_field(name="", value="", inline=True)
         log_embed.add_field(name="Player:", value=self.ctx.author.display_name, inline=True)
         log_embed.add_field(name="Task:", value=Util.TASK_NUMBER_DICT.get(self.task_id))
         log_embed.add_field(name="", value="", inline=True)
         log_embed.add_field(name="Submitted on:", value=self.timestamp, inline=True)
-        
+        log_embed.set_footer(text=self.uuid_no)
+
         self.message = await self.logs_channel.send(embed=log_embed, view=self)
 
+    # log tool buttons
+    # add to constructor: purple: str, player: str
+    """
     @discord.ui.button(label="Approve", style=discord.ButtonStyle.green)
     async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
@@ -100,3 +99,4 @@ class LogTool(discord.ui.View):
         await QueryTool.delete_submission(self.uuid_no.__str__())
         print(f"Task {self.uuid_no.__str__()[:6]} has been rejected by the bingo admins.")
         await interaction.message.edit(view=None)
+    """
