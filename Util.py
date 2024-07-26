@@ -211,7 +211,7 @@ def is_admin(ctx: discord.ext.commands.Context) -> bool:
     return True
 
 
-async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.Bot, date_format: str) -> datetime.date:
+async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot, date_format: str) -> datetime.date:
     """
     Prompt the user to input a date and validate the format.
     param: Discord Context instance
@@ -229,7 +229,7 @@ async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.Bot, d
         except ValueError:
             await ctx.send(f"Date format not accepted. Please try again using the correct format (MM-DD-YY), or type 'no' to cancel submission.")
             
-async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.Bot, time_format: str) -> datetime.time:
+async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot, time_format: str) -> datetime.time:
     """
     Prompt the user to input a time and validate the format.
     param: Discord Context instance
@@ -247,7 +247,7 @@ async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.Bot, t
         except ValueError:
             await ctx.send("Time format not accepted. Please try again using the correct format (HH:MM), or type 'no' to cancel submission.")
 
-async def prompt_for_player(ctx: discord.ext.commands.Context, bot: discord.Bot) -> str:
+async def prompt_for_player(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot) -> str:
     """
     Prompt the user to input a player's name.
     param: Discord Context instance
