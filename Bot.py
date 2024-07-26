@@ -64,7 +64,7 @@ async def ranch(ctx: discord.ext.commands.Context) -> None:
     return: None
     """
     print(f"Ranch command used by: {ctx.author}")
-    await ctx.send("https://tinyurl.com/3ab8ptjt")
+    await ctx.send("https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&")
 
 
 @bot.command()
