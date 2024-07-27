@@ -77,7 +77,11 @@ class ApproveTool(discord.ui.View):
         task_id = submission["task_id"]
         sheets_tool = SheetsTool(submission["team"], submission["date_submitted"], submission["player"], submission["task_id"], self.purple if task_id == 998 else None)
         if task_id == 998:
+<<<<<<< HEAD
             await self.react_and_refresh(task_id, submission, approve=True, bonus=True)
+=======
+            await self.react_and_refresh(task_id, submission, bonus=True)
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
             sheets_tool.add_purple(submission["player"])
         else:
             await self.react_and_refresh(task_id, submission, approve=True)
@@ -88,10 +92,14 @@ class ApproveTool(discord.ui.View):
         await interaction.response.defer()
         submission = self.submissions[self.page]
         task_id = submission["task_id"]
+<<<<<<< HEAD
         if task_id == 998:
             await self.react_and_refresh(task_id, submission, bonus=True)
         else:
             await self.react_and_refresh(task_id, submission)
+=======
+        await self.react_and_refresh(task_id, submission)
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.blurple, custom_id="right_task")
     async def right_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -120,7 +128,11 @@ class ApproveTool(discord.ui.View):
         msg = await ch.fetch_message(message_id)
         return msg
 
+<<<<<<< HEAD
     async def react_and_refresh(self, task_id: int, submission: list, approve: bool = False, bonus: bool = False) -> None:
+=======
+    async def react_and_refresh(self, task_id: int, submission: list, bonus: bool = False, approve: bool = False) -> None:
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
         """
         Button event.  Reacts to submission with emoji, sends message to team submission channel.  Refreshes self.
         param task_id: int - bingo task number
@@ -129,12 +141,23 @@ class ApproveTool(discord.ui.View):
         param approve: bool - approve submission?  default to False (reject)
         return: None
         """
+<<<<<<< HEAD
         msg = await self.get_message(submission["message_id"], submission["team"])
         if bonus:
             await self.broadcast(msg, f"[{submission['purple']}]({submission['jump_url']}) bonus submission has been **{'approved' if approve else 'rejected'}**!")
         else:
             await self.broadcast(msg, f"Submission for Task #{task_id}: [{Util.TASK_NUMBER_DICT.get(task_id)}]({submission['jump_url']}) has been **{'approved' if approve else 'rejected'}**!")
         await msg.add_reaction(f"{'✅' if approve else '❌'}")     
+=======
+        if bonus:
+            await self.interaction.channel.send(f"{submission['purple']} bonus submission has been approved!")
+            return
+        else:
+            await self.interaction.channel.send(f"Submission for Task #{task_id}: [{Util.TASK_NUMBER_DICT.get(task_id)}]({submission['jump_url']}) has been **{'approved' if approve else 'rejected'}**!")
+            msg = await self.get_message(submission["message_id"], submission["team"])
+            await msg.add_reaction(f"{'✅' if approve else '❌'}")
+            await msg.channel.send(f"Submission for Task #{task_id}: [{Util.TASK_NUMBER_DICT.get(task_id)}]({submission['jump_url']}) has been **{'approved' if approve else 'rejected'}**!")
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
         await self.refresh()
 
     async def refresh(self) -> None:
@@ -165,6 +188,7 @@ class ApproveTool(discord.ui.View):
         new_embed = await self.populate_embed()
         self.update_buttons()
         await interaction.message.edit(embed=new_embed, view=self)
+<<<<<<< HEAD
 
     async def broadcast(self,  msg: discord.Message, content: str) -> None:
         """
@@ -175,3 +199,5 @@ class ApproveTool(discord.ui.View):
         """
         await self.interaction.channel.send(content)
         await msg.channel.send(content)
+=======
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0

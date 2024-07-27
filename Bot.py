@@ -34,12 +34,19 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!bingo", intents=intents)
 handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mode="w")
 
+<<<<<<< HEAD
 # TODO: teams database?  expand!!
 # TODO: cox purples as enum?
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
 # ! TODO: delete bonus bot message
 # ! TODO: Literal['Yes','No'] on SithBot?
+=======
+# ! TODO: teams database?  expand!!
+# ! TODO: cox purples as enum?
+# ! TODO: reject task message?
+# ! TODO: approve/reject logs!!
+>>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
 
 @bot.command()
 async def submit(ctx: commands.Context) -> None:
