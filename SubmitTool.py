@@ -9,7 +9,7 @@ import discord.ext
 
 
 class SubmitTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID):
+    def __init__(self, ctx: discord.ext.commands.Context, TEST_LOGS_CHANNEL_ID: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID):
         """
         param: Discord Context object
         param: Discord TextChannel object
@@ -22,7 +22,7 @@ class SubmitTool(discord.ui.View):
         """
         super().__init__(timeout=None)
         self.ctx = ctx
-        self.logs_channel = logs_channel
+        self.TEST_LOGS_CHANNEL_ID = TEST_LOGS_CHANNEL_ID
         self.task_id = task_id
         self.team = team
         self.multi = multi
@@ -57,10 +57,10 @@ class SubmitTool(discord.ui.View):
         d = datetime.datetime.now()
         timestamp = d.strftime("%Y-%m-%d at %H:%M:%S")
         await self.ctx.send("Sending submission to bingo admins...", delete_after=3.0)
-        await self.ctx.send(f"Submission for Task #{self.task_id}: {Util.TASK_NUMBER_DICT.get(self.task_id)} sent by {self.ctx.author.display_name} on {timestamp}.")
+        await self.ctx.send(f"Submission for Task #{self.task_id}: **{Util.TASK_NUMBER_DICT.get(self.task_id)}** was sent by {self.ctx.author.display_name} on {timestamp}.")
         async with QueryTool() as query_tool:
             await query_tool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id))
-        log_tool = LogTool(self.ctx, self.logs_channel, self.multi, self.team, self.task_id, d, self.uuid_no)
+        log_tool = LogTool(self.ctx, self.TEST_LOGS_CHANNEL_ID, self.multi, self.team, self.task_id, d, self.uuid_no)
         await log_tool.create_log_embed()
         await interaction.response.edit_message(view=None)
         await self.message.delete()
