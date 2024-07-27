@@ -165,7 +165,6 @@ class ApproveTool(discord.ui.View):
         new_embed = await self.populate_embed()
         self.update_buttons()
         await interaction.message.edit(embed=new_embed, view=self)
-<<<<<<< HEAD
 
     async def broadcast(self,  msg: discord.Message, content: str) -> None:
         """
@@ -176,5 +175,3 @@ class ApproveTool(discord.ui.View):
         """
         await self.interaction.channel.send(content)
         await msg.channel.send(content)
-=======
->>>>>>> 2c24ecbc5204ec750cbf0d407dc1bde8309fcda0
