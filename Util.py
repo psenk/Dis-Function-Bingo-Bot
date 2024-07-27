@@ -1,45 +1,52 @@
 from datetime import datetime
-import discord
 from enum import Enum
 
+import discord
 import discord.ext
 import discord.ext.commands
 
-BINGO_ADMIN_ROLE_ID = 1265728711731183759 # ! REPLACE WHEN MOVING TO SITH SERVER
-BINGO_TEAM_IDS_LIST = [1262935908777332757] # ! REPLACE WHEN MOVED TO SITH SERVER, TEAM ROLES HAVE BEEN CREATED
-BINGO_TEAM_NAMES_LIST = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"] # ! REPLACE WHEN HAVE ACTUAL TEAM NAME
+import Util
+
+BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! REPLACE WHEN MOVING TO SITH SERVER
+BINGO_TEAM_IDS_LIST = [1262935908777332757]  # ! REPLACE WHEN MOVED TO SITH SERVER, TEAM ROLES HAVE BEEN CREATED
+BINGO_TEAM_NAMES_LIST = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]  # ! REPLACE WHEN HAVE ACTUAL TEAM NAME
 BINGO_TEAM_SUBMISSION_CHANNEL_IDS_LIST = []
 
+TEST_ADMIN_CHANNEL_ID = 1194488938480537740  # ! SWAP DURING LIVE BINGO
 TEST_GUILD_ID = 969399636995493899
 TEST_SUBMISSION_CHANNELS = {
-    "Godopka Team Name Pending": 1266581710657814599, 
-    "Starship Enterprise": 1266581710657814599, 
+    "Godopka Team Name Pending": 1266581710657814599,
+    "Starship Enterprise": 1266581710657814599,
     "Cheese Cape": 1266581710657814599,
     "Sasa Loves Bingo": 1266581710657814599,
     "Drunk Chinchompa": 1266581710657814599,
-    }
-TEST_LOGS_CHANNEL_ID = 1194488938480537740  # ! SWAP DURING LIVE BINGO
+}
+
+
 
 COX_PURPLES = [
-    "Dexterous prayer scroll",
-    "Arcane prayer scroll",
-    "Twisted buckler",
-    "Dragon hunter crossbow",
-    "Dinh's bulwark",
-    "Ancestral hat",
-    "Ancestral robe top",
-    "Ancestral robe bottom",
-    "Dragon claws",
-    "Elder maul",
-    "Kodai insignia",
-    "Twisted bow"
-]
+    discord.app_commands.Choice(name="Dexterous prayer scroll", value=1),
+    discord.app_commands.Choice(name="Arcane prayer scroll", value=2),
+    discord.app_commands.Choice(name="Twisted buckler", value=3),
+    discord.app_commands.Choice(name="Dragon hunter crossbow", value=4),
+    discord.app_commands.Choice(name="Dinh's bulwark", value=5),
+    discord.app_commands.Choice(name="Ancestral hat", value=6),
+    discord.app_commands.Choice(name="Ancestral robe top", value=7),
+    discord.app_commands.Choice(name="Ancestral robe bottom", value=8),
+    discord.app_commands.Choice(name="Dragon claws", value=9),
+    discord.app_commands.Choice(name="Elder maul", value=10),
+    discord.app_commands.Choice(name="Kodai insignia", value=11),
+    discord.app_commands.Choice(name="Twisted bow", value=12)
+    ]
+
+DATE_FORMAT = "%m-%d-%y"
+TIME_FORMAT = "%H:%M"
 
 TASK_NUMBER_DICT = {
     1: "Get any good purple (No Prayer Scrolls)",
     2: "Get 5 Prayer Scrolls",
-    3: "Complete the \"Kill it with Fire\" Combat Task",
-    4: "Complete the \"Perfect Olm\" Combat Task",
+    3: 'Complete the "Kill it with Fire" Combat Task',
+    4: 'Complete the "Perfect Olm" Combat Task',
     5: "Obtain a complete set of Ancestral",
     6: "Make a Kodai Wand from scratch",
     7: "Complete a 5-Scale Challenge Mode in 25 minutes or less",
@@ -69,7 +76,7 @@ TASK_NUMBER_DICT = {
     31: "Obtain Any Pet Transmog",
     32: "Obtain a complete set of Masori",
     33: "Get at least 2 of the Combat Tasks: Perfect Ba-Ba, Kephri, Akkha, Zebak",
-    34: "Complete the \"Chompington\" Combat Task",
+    34: 'Complete the "Chompington" Combat Task',
     35: "Complete a 300+ Invo TOA within 18 minutes at any group size",
     36: "Complete a deathless 500 with a group of at least 3 teammates",
     37: "Get any 3 different Wintertodt uniques",
@@ -92,15 +99,15 @@ TASK_NUMBER_DICT = {
     54: "Complete A Voidwaker from scratch",
     55: "Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min",
     56: "Get a purple!",
-    57: "Complete the \"Back in my Day\" Combat Task",
+    57: 'Complete the "Back in my Day" Combat Task',
     58: "Bring a learner through a first clear Hard Mode",
     59: "Obtain a complete set of Justiciar",
     60: "Complete a deathless Hard Mode with at least 5 team members",
-    61: "Complete the \"Personal Space\" Combat Achievement",
+    61: 'Complete the "Personal Space" Combat Achievement',
     62: "Obtain a Holy Ornament Kit and a Sanguine Ornament Kit",
     63: "Get Lil' Zik",
     998: "Bonus Task",
-    999: "Test Task"
+    999: "Test Task",
 }
 
 TASK_POINTS_DICT = {
@@ -175,10 +182,8 @@ TEAMS_SHEETS_COLUMN_DICT = {
     "Cheese Cape": 7,
     "Sasa Loves Bingo": 8,
     "Drunk Chinchompa": 9,
-    "Starship Enterprise": 10
+    "Starship Enterprise": 10,
 }
-
-
 
 
 # Checks if task id is out of bounds (1 <= task_id <= num_tasks)
@@ -205,6 +210,7 @@ def get_user_team(roles: list) -> str:
         for role in roles:
             if team_id == role.id:
                 return role.name
+    return None
 
 
 def is_admin(member: discord.Member) -> bool:
@@ -216,51 +222,16 @@ def is_admin(member: discord.Member) -> bool:
     return True
 
 
-async def prompt_for_date(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot, date_format: str) -> datetime.date:
-    """
-    Prompt the user to input a date and validate the format.
-    param: Discord Context instance
-    param: Discord Bot instance
-    param str: datetime string format for date
-    return: datetime.date instance
-    """
-    while True:
-        await ctx.send("_ _\nFind the date listed on your codeword plugin in your screenshot and post it below.\nPlease use the following format: MM-DD-YY\nExample: **08-16-91**\n\nType 'no' to cancel submission.")
-        date_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-        if date_msg.content.lower() == "no":
-            return None
-        try:
-            return datetime.strptime(date_msg.content, date_format).date()
-        except ValueError:
-            await ctx.send(f"Date format not accepted. Please try again using the correct format (MM-DD-YY), or type 'no' to cancel submission.")
-            
-async def prompt_for_time(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot, time_format: str) -> datetime.time:
-    """
-    Prompt the user to input a time and validate the format.
-    param: Discord Context instance
-    param: Discord Bot instance
-    param str: datetime string format for time
-    return: datetime.time instance
-    """
-    while True:
-        await ctx.send("Find the 24-hour UTC time listed on your codeword plugin in your screenshot and post it below.\nUse the following format: HH:MM\nExample: **13:52**\n\nType 'no' to cancel submission.")
-        time_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-        if time_msg.content.lower() == "no":
-            return None
-        try:
-            return datetime.strptime(time_msg.content, time_format).time()
-        except ValueError:
-            await ctx.send("Time format not accepted. Please try again using the correct format (HH:MM), or type 'no' to cancel submission.")
-
-async def prompt_for_player(ctx: discord.ext.commands.Context, bot: discord.ext.commands.Bot) -> str:
-    """
-    Prompt the user to input a player's name.
-    param: Discord Context instance
-    param: Discord Bot instance
-    return: str
-    """
-    await ctx.send("Enter the name of the player that obtained the drop below.\n\nType 'no' to cancel submission.")
-    player_msg = await bot.wait_for("message", check=lambda m: m.author == ctx.author)
-    if player_msg.content.lower() == "no":
-        return None
-    return player_msg.content.strip()
+async def validate_data(interaction: discord.Interaction, date: str = None, time: str = None) -> bool:
+    try:
+        if date:
+            datetime.strptime(date, Util.DATE_FORMAT)
+        if time:
+            datetime.strptime(time, Util.TIME_FORMAT)
+    except ValueError:
+        if date:
+            await interaction.channel.send("Invalid **date* format. Use format: MM-DD-YY")
+        if time:
+            await interaction.channel.send("Invalid *time* format. Use format: HH:MM")
+        return False
+    return True

@@ -1,11 +1,8 @@
 import discord
-
-import discord.ext
 import discord.ext.commands
-
+import Util
 from QueryTool import QueryTool
 from SheetsTool import SheetsTool
-import Util
 
 # GUILD_ID = 741153043776667658 # ! LIVE CODE
 
@@ -36,12 +33,11 @@ class ApproveTool(discord.ui.View):
         async with QueryTool() as query_tool:
             self.submissions = await query_tool.get_submissions()
         if not self.submissions:
-            await self.interaction.response.send_message("There are no submissions to approve at this time.")
+            await self.interaction.followup.send("There are no submissions to approve at this time.")
             return
-        else:
-            approve_tool = await self.populate_embed()
-            self.update_buttons()
-            self.message = await self.interaction.response.send_message(embed=approve_tool, view=self)
+        approve_tool = await self.populate_embed()
+        self.update_buttons()
+        self.message = await self.interaction.followup.send(embed=approve_tool, view=self)
 
     async def populate_embed(self) -> discord.Embed:
         """
@@ -49,19 +45,20 @@ class ApproveTool(discord.ui.View):
         return: Discord Embed instance
         """
         submission = self.submissions[self.page]
-        self.uuid = submission["uuid"]
-        self.purple = submission["purple"]
-        approve_tool = discord.Embed(title=f"Submission Approval Tool", color=0x0000FF, description=f"ID # {submission['uuid'][:8]}")
-        approve_tool.add_field(name="Submission:", value=f"[HERE]({submission['jump_url']})", inline=True)
-        approve_tool.add_field(name="Player:", value=f"{submission['player']}", inline=True)
+        approve_tool = discord.Embed(title=f"Submission Approval Tool", color=0xFFFF00)
+        approve_tool.add_field(name="Submission", value=f"[HERE]({submission['jump_url']})", inline=True)
+        approve_tool.add_field(name="Player", value=f"{submission['player']}", inline=True)
         approve_tool.add_field(name="", value="", inline=True)
-        approve_tool.add_field(name="Team:", value=f"{submission['team']}", inline=True)
-        approve_tool.add_field(name="Date Submitted:", value=f"{submission['date_submitted'].strftime('%Y-%m-%d at %H:%M')}", inline=True)
+        approve_tool.add_field(name="Team", value=f"{submission['team']}", inline=True)
+        approve_tool.add_field(name="Date Submitted", value=f"{submission['date_submitted'].strftime('%Y-%m-%d at %H:%M')}", inline=True)
         approve_tool.add_field(name="", value="", inline=True)
-        approve_tool.add_field(name="Task ID:", value=f"{submission['task_id']}", inline=True)
-        approve_tool.add_field(name="Task:", value=f"{Util.TASK_NUMBER_DICT[submission['task_id']]}", inline=True)
-        approve_tool.add_field(name="", value="", inline=True)
-        approve_tool.set_footer(text=self.uuid)
+        if submission['purple'] is None:
+            approve_tool.add_field(name="Task ID", value=f"{submission['task_id']}", inline=True)
+            approve_tool.add_field(name="Task", value=f"{Util.TASK_NUMBER_DICT[submission['task_id']]}", inline=True)
+            approve_tool.add_field(name="", value="", inline=True)
+        else:
+            approve_tool.add_field(name="Bonus Task Purple", value=submission['purple'])
+        approve_tool.set_footer(text=submission['uuid'])
 
         return approve_tool
 
@@ -74,24 +71,20 @@ class ApproveTool(discord.ui.View):
     async def approve_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         submission = self.submissions[self.page]
-        task_id = submission["task_id"]
-        sheets_tool = SheetsTool(submission["team"], submission["date_submitted"], submission["player"], submission["task_id"], self.purple if task_id == 998 else None)
-        if task_id == 998:
-            await self.react_and_refresh(task_id, submission, approve=True, bonus=True)
-            sheets_tool.add_purple(submission["player"])
+        task_id = submission['task_id']
+        sheets_tool = SheetsTool(submission['team'], submission['date_submitted'], submission['player'], submission['task_id'], submission['purple'])
+        await self.react_and_refresh(task_id, submission, approve=True, bonus=submission['purple'] is None)
+        if submission['purple'] is not None:
+            sheets_tool.add_purple(submission['player'])
         else:
-            await self.react_and_refresh(task_id, submission, approve=True)
             sheets_tool.update_sheets()
 
     @discord.ui.button(label="Reject", style=discord.ButtonStyle.red, custom_id="reject_task")
     async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         submission = self.submissions[self.page]
-        task_id = submission["task_id"]
-        if task_id == 998:
-            await self.react_and_refresh(task_id, submission, bonus=True)
-        else:
-            await self.react_and_refresh(task_id, submission)
+        task_id = submission['task_id']
+        await self.react_and_refresh(task_id, submission, approve=False, bonus=submission['purple'] is None)
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.blurple, custom_id="right_task")
     async def right_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -117,8 +110,7 @@ class ApproveTool(discord.ui.View):
         """
 
         ch = self.bot.get_channel(Util.TEST_SUBMISSION_CHANNELS.get(team))
-        msg = await ch.fetch_message(message_id)
-        return msg
+        return await ch.fetch_message(message_id)
 
     async def react_and_refresh(self, task_id: int, submission: list, approve: bool = False, bonus: bool = False) -> None:
         """
@@ -129,12 +121,11 @@ class ApproveTool(discord.ui.View):
         param approve: bool - approve submission?  default to False (reject)
         return: None
         """
-        msg = await self.get_message(submission["message_id"], submission["team"])
-        if bonus:
-            await self.broadcast(msg, f"[{submission['purple']}]({submission['jump_url']}) bonus submission has been **{'approved' if approve else 'rejected'}**!")
-        else:
-            await self.broadcast(msg, f"Submission for Task #{task_id}: [{Util.TASK_NUMBER_DICT.get(task_id)}]({submission['jump_url']}) has been **{'approved' if approve else 'rejected'}**!")
-        await msg.add_reaction(f"{'✅' if approve else '❌'}")     
+        msg = await self.get_message(submission['message_id'], submission['team'])        
+        content = (f"Submission for [{(submission['purple']) if submission['purple'] is None else ('Task # ' + str(task_id) + ': ' + Util.TASK_NUMBER_DICT.get(task_id))}]"
+        f"({submission['jump_url']}) has been **{'approved' if approve else 'rejected'}**!")
+        await self.broadcast(msg, content)
+        await msg.add_reaction(f"{'✅' if approve else '❌'}")
         await self.refresh()
 
     async def refresh(self) -> None:
@@ -166,7 +157,7 @@ class ApproveTool(discord.ui.View):
         self.update_buttons()
         await interaction.message.edit(embed=new_embed, view=self)
 
-    async def broadcast(self,  msg: discord.Message, content: str) -> None:
+    async def broadcast(self, msg: discord.Message, content: str) -> None:
         """
         Messages self and submissions channel.
         param content: str - message to be broadcast

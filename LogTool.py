@@ -9,10 +9,11 @@ import Util
 
 
 class LogTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, TEST_LOGS_CHANNEL_ID: discord.TextChannel, multi: bool, team: str, task_id: int, timestamp: datetime.datetime, uuid_no: uuid.UUID):
+    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, multi: bool, team: str, timestamp: datetime.datetime, uuid_no: uuid.UUID, task_id: int = None):
         """
-        param: Discord Context object
-        param: Discord TextChannel object
+        LogTool Constructor
+        param ctx: Discord Context instance
+        param logs_channel: Discord TextChannel 
         param boolean: multiple submissions
         param string: bingo team name
         param int: bingo task number
@@ -23,7 +24,7 @@ class LogTool(discord.ui.View):
         """
         super().__init__(timeout=None)
         self.ctx = ctx
-        self.TEST_LOGS_CHANNEL_ID = TEST_LOGS_CHANNEL_ID
+        self.logs_channel = logs_channel
         self.multi = multi
         self.team = team
         self.task_id = task_id
@@ -43,21 +44,16 @@ class LogTool(discord.ui.View):
         description: posts log embed to logs channel
         return: None
         """
-        if self.multi:
-            log_embed = discord.Embed(title="Dis Function's Bingo Bonanza", color=0x0000FF)
-            log_embed.set_author(name=f"Submission Received (multiple images)", url=self.ctx.message.jump_url)
-        else:
-            log_embed = discord.Embed(title="Dis Function's Bingo Bonanza", color=0x0000FF)
-            log_embed.set_author(name=f"Submission Received", url=self.ctx.message.jump_url)
+        
+        log_embed = discord.Embed(title=f"Submission Received{' (multiple images)' if self.multi else ''}", color=0x0000FF)
+        log_embed.set_author(name=f"Submission", url=self.ctx.message.jump_url)
 
-        # log_embed(name="Submission Link", url=ctx.message.jump_url)
-        log_embed.set_thumbnail(url=self.ctx.message.attachments[0].url)
-        log_embed.add_field(name="Team:", value=self.team, inline=True)
+        log_embed.add_field(name="Team", value=self.team, inline=True)
+        log_embed.add_field(name="Player", value=self.ctx.author.display_name, inline=True)
         log_embed.add_field(name="", value="", inline=True)
-        log_embed.add_field(name="Player:", value=self.ctx.author.display_name, inline=True)
-        log_embed.add_field(name="Task:", value=Util.TASK_NUMBER_DICT.get(self.task_id))
+        log_embed.add_field(name="Task", value=f"{'Bonus' if self.multi else Util.TASK_NUMBER_DICT.get(self.task_id)}")
+        log_embed.add_field(name="Submitted on", value=self.timestamp, inline=True)
         log_embed.add_field(name="", value="", inline=True)
-        log_embed.add_field(name="Submitted on:", value=self.timestamp, inline=True)
         log_embed.set_footer(text=self.uuid_no)
 
-        self.message = await self.TEST_LOGS_CHANNEL_ID.send(embed=log_embed, view=self)
+        self.message = await self.logs_channel.send(embed=log_embed, view=self)

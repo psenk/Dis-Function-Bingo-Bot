@@ -59,7 +59,7 @@ class SubmitTool(discord.ui.View):
         await self.ctx.send("Sending submission to bingo admins...", delete_after=3.0)
         await self.ctx.send(f"Submission for Task #{self.task_id}: **{Util.TASK_NUMBER_DICT.get(self.task_id)}** was sent by {self.ctx.author.display_name} on {timestamp}.")
         async with QueryTool() as query_tool:
-            await query_tool.submit_task(self.task_id, self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id))
+            await query_tool.submit_task(self.ctx.author.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), self.task_id)
         log_tool = LogTool(self.ctx, self.TEST_LOGS_CHANNEL_ID, self.multi, self.team, self.task_id, d, self.uuid_no)
         await log_tool.create_log_embed()
         await interaction.response.edit_message(view=None)
