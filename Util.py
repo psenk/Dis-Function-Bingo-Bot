@@ -1,10 +1,39 @@
 from datetime import datetime
 import discord
+from enum import Enum
 
 import discord.ext
 import discord.ext.commands
 
-BINGO_ADMIN = 1265728711731183759
+BINGO_ADMIN_ROLE_ID = 1265728711731183759 # ! REPLACE WHEN MOVING TO SITH SERVER
+BINGO_TEAM_IDS_LIST = [1262935908777332757] # ! REPLACE WHEN MOVED TO SITH SERVER, TEAM ROLES HAVE BEEN CREATED
+BINGO_TEAM_NAMES_LIST = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"] # ! REPLACE WHEN HAVE ACTUAL TEAM NAME
+BINGO_TEAM_SUBMISSION_CHANNEL_IDS_LIST = []
+
+TEST_GUILD_ID = 969399636995493899
+TEST_SUBMISSION_CHANNELS = {
+    "Godopka Team Name Pending": 1266581710657814599, 
+    "Starship Enterprise": 1266581710657814599, 
+    "Cheese Cape": 1266581710657814599,
+    "Sasa Loves Bingo": 1266581710657814599,
+    "Drunk Chinchompa": 1266581710657814599,
+    }
+TEST_LOGS_CHANNEL_ID = 1194488938480537740  # ! SWAP DURING LIVE BINGO
+
+COX_PURPLES = [
+    "Dexterous prayer scroll",
+    "Arcane prayer scroll",
+    "Twisted buckler",
+    "Dragon hunter crossbow",
+    "Dinh's bulwark",
+    "Ancestral hat",
+    "Ancestral robe top",
+    "Ancestral robe bottom",
+    "Dragon claws",
+    "Elder maul",
+    "Kodai insignia",
+    "Twisted bow"
+]
 
 TASK_NUMBER_DICT = {
     1: "Get any good purple (No Prayer Scrolls)",
@@ -149,32 +178,8 @@ TEAMS_SHEETS_COLUMN_DICT = {
     "Starship Enterprise": 10
 }
 
-COX_PURPLES = [
-    "Dexterous prayer scroll",
-    "Arcane prayer scroll",
-    "Twisted buckler",
-    "Dragon hunter crossbow",
-    "Dinh's bulwark",
-    "Ancestral hat",
-    "Ancestral robe top",
-    "Ancestral robe bottom",
-    "Dragon claws",
-    "Elder maul",
-    "Kodai insignia",
-    "Twisted bow"
-]
 
-BINGO_TEAMS_IDS = [1262935908777332757]
-BINGO_TEAMS_STRS = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]
 
-TEST_GUILD_ID = 969399636995493899
-TEST_SUBMISSION_CHANNELS = {
-    "Godopka Team Name Pending": 986537383250001940, 
-    "Starship Enterprise": 986537383250001940, 
-    "Cheese Cape": 986537383250001940,
-    "Sasa Loves Bingo": 986537383250001940,
-    "Drunk Chinchompa": 986537383250001940,
-    }
 
 # Checks if task id is out of bounds (1 <= task_id <= num_tasks)
 # Tested good 16 Jul 2024
@@ -196,17 +201,17 @@ def check_screenshots(screenshots) -> bool:
 # Gets users bingo team
 # Tested good 19 Jul 2024
 def get_user_team(roles: list) -> str:
-    for team_id in BINGO_TEAMS_IDS:
+    for team_id in BINGO_TEAM_IDS_LIST:
         for role in roles:
             if team_id == role.id:
                 return role.name
 
 
-def is_admin(ctx: discord.ext.commands.Context) -> bool:
+def is_admin(member: discord.Member) -> bool:
     roles = []
-    for role in ctx.author.roles:
+    for role in member.roles:
         roles.append(role.id)
-    if BINGO_ADMIN not in roles:
+    if BINGO_ADMIN_ROLE_ID not in roles:
         return False
     return True
 

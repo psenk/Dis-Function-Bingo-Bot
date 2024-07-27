@@ -9,7 +9,7 @@ import Util
 
 
 class LogTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, multi: bool, team: str, task_id: int, timestamp: datetime.datetime, uuid_no: uuid.UUID):
+    def __init__(self, ctx: discord.ext.commands.Context, TEST_LOGS_CHANNEL_ID: discord.TextChannel, multi: bool, team: str, task_id: int, timestamp: datetime.datetime, uuid_no: uuid.UUID):
         """
         param: Discord Context object
         param: Discord TextChannel object
@@ -23,7 +23,7 @@ class LogTool(discord.ui.View):
         """
         super().__init__(timeout=None)
         self.ctx = ctx
-        self.logs_channel = logs_channel
+        self.TEST_LOGS_CHANNEL_ID = TEST_LOGS_CHANNEL_ID
         self.multi = multi
         self.team = team
         self.task_id = task_id
@@ -60,4 +60,4 @@ class LogTool(discord.ui.View):
         log_embed.add_field(name="Submitted on:", value=self.timestamp, inline=True)
         log_embed.set_footer(text=self.uuid_no)
 
-        self.message = await self.logs_channel.send(embed=log_embed, view=self)
+        self.message = await self.TEST_LOGS_CHANNEL_ID.send(embed=log_embed, view=self)
