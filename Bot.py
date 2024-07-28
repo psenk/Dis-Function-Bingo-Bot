@@ -3,16 +3,16 @@ import os
 import random
 import uuid
 from datetime import datetime
+from typing import List
 
 import discord
-from discord.ext import commands
-from discord import app_commands
+from discord import File, app_commands
 from discord.app_commands import Choice
+from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 import Util
-from Util import COX_PURPLES
 from ApproveTool import ApproveTool
 from ConfirmTool import ConfirmTool
 from LogTool import LogTool
@@ -26,7 +26,7 @@ GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
 DB_LOCALHOST = os.getenv("MYSQL_LOCALHOST")
 DB_USER_NAME = os.getenv("MYSQL_USER_NAME")
 DB_PW = os.getenv("MYSQL_PW")
-GUILD_TEST = discord.Object(969399636995493899)  # ! SWAP DURING LIVE BINGO
+TEST_GUILD = discord.Object(969399636995493899)  # ! SWAP DURING LIVE BINGO
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -40,63 +40,17 @@ handler = logging.FileHandler(filename="logs\\discord.log", encoding="utf-8", mo
 # ! TODO: more robust error handling
 
 
-@bot.command()
-async def submit(ctx: commands.Context) -> None:
-    """
-    param: Discord context object
-    description: Submits task for approval
-    return: None
-    """
-    print(f"Submit command used by: {ctx.author}")
-
-    cmd = ctx.message.content.split()
-    if len(cmd) == 1:
-        await ctx.send("No bingo task number detected with post.")
-        return
-
-    team: str = Util.get_user_team(ctx.author.roles)
-    if team not in Util.BINGO_TEAM_NAMES_LIST:
-        await ctx.send("You are not authorized to use this command!")
-        return
-    if ctx.channel.id != Util.TEST_SUBMISSION_CHANNELS[team]:
-        await ctx.send("This is not your teams bingo submission channel!")
-        return
-
-    screenshots: list = ctx.message.attachments
-    if not screenshots:
-        await ctx.send("No screenshots detected with submission.")
-        return
-
-    task_id: int = int(cmd[1])
-    task_id_check: bool = Util.check_task_id(task_id)
-    # task no out of bounds error
-    if not task_id_check:
-        await ctx.send("Your task ID is out of bounds.")
-        return
-    async with QueryTool() as tool:
-        day = await tool.get_day()
-    if task_id > day * 9:
-        await ctx.send("This task is not available yet!")
-        return
-
-    multi: bool = len(screenshots) > 1
-
-    uuid_no = uuid.uuid1()
-    # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
-    submit_tool = SubmitTool(ctx, bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID), task_id, team, multi, uuid_no)
-    await submit_tool.create_submit_tool_embed()
-
+### * ADMIN COMMANDS
 
 @bot.tree.command(description="Displays bot help menu for bingo admins.")
 @app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def helpadmin(interaction: discord.Interaction) -> None:
     """
     Shows list of commands available to bingo admins.
     param interaction: Discord Interaction instance
     return: None
     """
-
     help_embed = discord.Embed(title="Foki Bot Admin Commands", color=0xFFFF00)
     help_embed.set_thumbnail(url=bot.user.avatar.url)
     help_embed.add_field(name="/approve", value="Opens tool for reviewing active bingo submissions.", inline=True)
@@ -110,7 +64,7 @@ async def helpadmin(interaction: discord.Interaction) -> None:
 @bot.tree.command(description="Display bingo task information.")
 @app_commands.describe(task_id="Bingo Task Number")
 @app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def task(interaction: discord.Interaction, task_id: int) -> None:
     """
     Displays bingo task information.
@@ -123,7 +77,7 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
 
 @bot.tree.command(description="Kill the bot.")
 @app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 @commands.is_owner()
 async def kill(interaction: discord.Interaction) -> None:
     """
@@ -138,7 +92,7 @@ async def kill(interaction: discord.Interaction) -> None:
 @bot.tree.command(description="Set day of bingo.")
 @app_commands.describe(day="Day of bingo")
 @app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def day(interaction: discord.Interaction, day: int) -> None:
     """
     Updates the current day of the bingo.
@@ -154,7 +108,7 @@ async def day(interaction: discord.Interaction, day: int) -> None:
 
 @bot.tree.command(description="Opens tool for reviewing active bingo submissions.")
 @app_commands.checks.has_permissions(manage_guild=True)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def approve(interaction: discord.Interaction) -> None:
     """
     Opens tool for reviewing active bingo submissions.
@@ -171,8 +125,10 @@ async def approve(interaction: discord.Interaction) -> None:
     await approve_tool.create_approve_embed()
 
 
+### * USER COMMANDS
+
 @bot.tree.command(description="Displays bot help menu.")
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def help(interaction: discord.Interaction) -> None:
     """
     Shows help menu for normal users.
@@ -193,7 +149,7 @@ async def help(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(description="Bingo butt!")
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def butt(interaction: discord.Interaction) -> None:
     """
     Ping pong command as bingo butt.  Sith tradition.
@@ -214,25 +170,91 @@ async def butt(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(description="Ram Ranch really rocks!")
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def ranch(interaction: discord.Interaction) -> None:
     """
     Ping pong command as ram ranch image.  Custom command.
     param interaction: Discord Interaction instance
     return: None
     """
-
     await interaction.response.send_message("https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&")
 
+# ! As days/dropdowns?  e.g Day 4 - Task 7
+@bot.tree.command(description="Submit a bingo task for approval.")
+@app_commands.describe(task_id="Bingo task number")
+@app_commands.guilds(TEST_GUILD)
+async def submit(interaction: discord.Interaction, task_id: int) -> None:
+    """
+    Submits bingo task to bingo team for approval.
+    param interaction: Discord Interaction instance
+    param task_id: int - bingo task number
+    param submissions: list - list of submission screenshots
+    return: None
+    """
+    await interaction.response.defer()
+    global bot
+    
+    team = Util.get_user_team(interaction.user.roles)
+    
+    # is user in bingo
+    if team is None:
+        await interaction.followup.send("You are not authorized to use this command!")
+        return
+    
+    # is this users submission channel
+    if interaction.channel_id != Util.TEST_SUBMISSION_CHANNELS.get(team):
+        await interaction.followup.send("This is not your teams submission channel!")
+        return
 
+    # is this a valid task number
+    if not Util.check_task_id(task_id):
+        await interaction.followup.send("Invalid task id!")
+        return
+    
+    # is this task unlocked yet?
+    async with QueryTool() as tool:
+        day = await tool.get_day()
+    if task_id > day * 9:
+        await interaction.followup.send("This task is not available yet!")
+        return
+
+    # get screenshots
+    await interaction.followup.send(file=File("docs/submit.jpg"))
+    message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
+
+    if not message.attachments:
+        await interaction.followup.send("No attachments found.  Please attach submission screenshots.")
+    
+    # ok cool
+    multi = len(message.attachments) > 1
+    uuid_no = uuid.uuid1()
+    # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
+    
+    logs_channel = bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID)
+    submit_tool = SubmitTool(interaction, logs_channel, task_id, team, multi, uuid_no)
+    await submit_tool.create_submit_tool_embed()
+    
+    await interaction.channel.send("The bingo admin team has received your submission!", delete_after=10.0)
+
+# ! TURN CONFIRM SCREEN INTO NEAT IMBED INSTEAD OF MESSY STRING
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
-@app_commands.describe(purple="Name of item received.", 
-                       date="Date of bonus submission on screenshot, format MM-DD-YY,", 
-                       time="Time of bonus submission on screenshot, format HH:MM (24-hr).", 
-                       player="Name of player that received the purple.")
+@app_commands.describe(purple="Name of item received", 
+                       date="Date of bonus submission on screenshot, format MM-DD-YY", 
+                       time="Time of bonus submission on screenshot, format HH:MM (24-hr)", 
+                       player="Name of player that received the purple")
 @app_commands.choices(purple=Util.COX_PURPLES)
-@app_commands.guilds(GUILD_TEST)
+@app_commands.guilds(TEST_GUILD)
 async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member, submission: discord.Attachment) -> None:
+    """
+    Submits a bonus task to bingo admins for approval.
+    param interaction: Discord Interaction instance
+    param purple: str - name of bonus item
+    param date: str - date of submission
+    param time: str - time of submission
+    param player: Discord Member instance
+    param submission: submission screenshot
+    return: None
+    """
     await interaction.response.defer()
     
     # is user in bingo
@@ -291,8 +313,8 @@ async def on_ready() -> None:
     return: None
     """
     await bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID).send("Foki Bot online!")
-    print(f"Bingo Bot online as of {datetime.now()}.")
-    await bot.tree.sync(guild=GUILD_TEST)
+    print(f"Bingo Bot online as of {datetime.now().strftime(Util.DATE_FORMAT + ' ' + Util.TIME_FORMAT)}.")
+    await bot.tree.sync(guild=TEST_GUILD)
 
 
 # ? UNFINISHED CODE

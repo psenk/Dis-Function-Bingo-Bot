@@ -14,12 +14,11 @@ class LogTool(discord.ui.View):
         LogTool Constructor
         param ctx: Discord Context instance
         param logs_channel: Discord TextChannel 
-        param boolean: multiple submissions
-        param string: bingo team name
-        param int: bingo task number
-        param datetime: timestamp of submission
-        param uuid: UUID number of submission
-        description: Constructor for LogTool
+        param multi: bool - multiple submissions
+        param team: str - bingo team name
+        param timestamp: timestamp of submission
+        param uuid_no: UUID number of submission
+        param task_id: int - optional, bingo task number
         return: None
         """
         super().__init__(timeout=None)

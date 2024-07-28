@@ -101,7 +101,7 @@ class QueryTool:
 
         async with self.pool.acquire() as connection:
             day = await connection.fetchval(query)
-        print("Retrieved bingo day, connection closed..")
+        print("Retrieved bingo day, connection closed.")
         return day
 
     # ? For future database growth

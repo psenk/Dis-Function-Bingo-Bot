@@ -250,16 +250,6 @@ async def validate_data(interaction: discord.Interaction, date: str, time: str) 
     return True
 
 # ? UNUSED CODE
-
-class ChannelIDs(Enum):
-    TEST_ADMIN_CHANNEL = 1194488938480537740
-    TEST_SUBMISSION_CHANNEL = 1266581710657814599
-    # teams
-    GODOPKA = 1266581710657814599
-    STARSHIP = 1266581710657814599
-    CHEESE = 1266581710657814599
-    SASA = 1266581710657814599
-    DRUNK = 1266581710657814599
     
 def check_screenshots(screenshots) -> bool:
     pass

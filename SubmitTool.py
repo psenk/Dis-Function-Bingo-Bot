@@ -9,7 +9,7 @@ import discord.ext
 
 
 class SubmitTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, TEST_LOGS_CHANNEL_ID: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID):
+    def __init__(self, interaction: discord.Interaction, logs_channel: discord.TextChannel, task_id: int, team: str, multi: bool, uuid_no: uuid.UUID):
         """
         param: Discord Context object
         param: Discord TextChannel object
@@ -21,8 +21,8 @@ class SubmitTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
-        self.ctx = ctx
-        self.TEST_LOGS_CHANNEL_ID = TEST_LOGS_CHANNEL_ID
+        self.interaction = interaction
+        self.logs_channel = logs_channel
         self.task_id = task_id
         self.team = team
         self.multi = multi
