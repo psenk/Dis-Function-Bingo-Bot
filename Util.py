@@ -22,8 +22,6 @@ TEST_SUBMISSION_CHANNELS = {
     "Drunk Chinchompa": 1266581710657814599,
 }
 
-
-
 COX_PURPLES = [
     discord.app_commands.Choice(name="Dexterous prayer scroll", value=1),
     discord.app_commands.Choice(name="Arcane prayer scroll", value=2),
@@ -186,9 +184,13 @@ TEAMS_SHEETS_COLUMN_DICT = {
 }
 
 
-# Checks if task id is out of bounds (1 <= task_id <= num_tasks)
-# Tested good 16 Jul 2024
+@staticmethod
 def check_task_id(task_no: int) -> bool:
+    """
+    Validates task ID.
+    param task_no: int - bingo task number
+    return: bool - is valid task number?
+    """
     if task_no <= 0:
         print("ERROR: Task submission failed, task id out of bounds. (less than zero)")
         return False
@@ -198,22 +200,26 @@ def check_task_id(task_no: int) -> bool:
     else:
         return True
 
-
-def check_screenshots(screenshots) -> bool:
-    pass
-
-
-# Gets users bingo team
-# Tested good 19 Jul 2024
+@staticmethod
 def get_user_team(roles: list) -> str:
+    """
+    Gets users bingo team.
+    param roles: list - list of users roles
+    return: str - bingo team name
+    """
     for team_id in BINGO_TEAM_IDS_LIST:
         for role in roles:
             if team_id == role.id:
                 return role.name
     return None
 
-
+@staticmethod
 def is_admin(member: discord.Member) -> bool:
+    """
+    Checks if member has admin role.
+    param member: Discord Member instance
+    return: bool - is member an admin?
+    """
     roles = []
     for role in member.roles:
         roles.append(role.id)
@@ -221,17 +227,39 @@ def is_admin(member: discord.Member) -> bool:
         return False
     return True
 
-
-async def validate_data(interaction: discord.Interaction, date: str = None, time: str = None) -> bool:
+@staticmethod
+async def validate_data(interaction: discord.Interaction, date: str, time: str) -> bool:
+    """
+    Validates format of input date or time.
+    param interaction: Discord Interaction instance
+    param date: str - date input
+    param time: str - time input
+    return: bool - is format good?
+    """
     try:
         if date:
             datetime.strptime(date, Util.DATE_FORMAT)
         if time:
             datetime.strptime(time, Util.TIME_FORMAT)
-    except ValueError:
-        if date:
+    except ValueError as e:
+        if date and "does not match format" in str(e):
             await interaction.channel.send("Invalid **date* format. Use format: MM-DD-YY")
-        if time:
+        if time and "does not match format" in str(e):
             await interaction.channel.send("Invalid *time* format. Use format: HH:MM")
         return False
     return True
+
+# ? UNUSED CODE
+
+class ChannelIDs(Enum):
+    TEST_ADMIN_CHANNEL = 1194488938480537740
+    TEST_SUBMISSION_CHANNEL = 1266581710657814599
+    # teams
+    GODOPKA = 1266581710657814599
+    STARSHIP = 1266581710657814599
+    CHEESE = 1266581710657814599
+    SASA = 1266581710657814599
+    DRUNK = 1266581710657814599
+    
+def check_screenshots(screenshots) -> bool:
+    pass
