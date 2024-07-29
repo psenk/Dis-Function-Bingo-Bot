@@ -9,15 +9,15 @@ import Util
 
 BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! REPLACE WHEN MOVING TO SITH SERVER
 BINGO_TEAM_IDS_LIST = [1262935908777332757]  # ! REPLACE WHEN MOVED TO SITH SERVER, TEAM ROLES HAVE BEEN CREATED
-BINGO_TEAM_NAMES_LIST = ["Sasa Loves Bingo", "Godopka Team Name Pending", "Starship Enterprise", "Cheese Cape", "Drunk Chinchompa"]  # ! REPLACE WHEN HAVE ACTUAL TEAM NAME
+BINGO_TEAM_NAMES_LIST = ["Sasa Loves Bingo", "Workday Warriors", "Starship Enterprise", "The Adamant Watermelons", "Drunk Chinchompa"]  # ! REPLACE WHEN HAVE ACTUAL TEAM NAME
 BINGO_TEAM_SUBMISSION_CHANNEL_IDS_LIST = []
 
 TEST_ADMIN_CHANNEL_ID = 1194488938480537740  # ! SWAP DURING LIVE BINGO
 TEST_GUILD_ID = 969399636995493899
 TEST_SUBMISSION_CHANNELS = {
-    "Godopka Team Name Pending": 1266581710657814599,
+    "Workday Warriors": 1266581710657814599,
     "Starship Enterprise": 1266581710657814599,
-    "Cheese Cape": 1266581710657814599,
+    "The Adamant Watermelons": 1266581710657814599,
     "Sasa Loves Bingo": 1266581710657814599,
     "Drunk Chinchompa": 1266581710657814599,
 }
@@ -280,8 +280,8 @@ TASK_POINTS_DICT = {
 
 TEAMS_SHEETS_COLUMN_DICT = {
     # value must be int, not char
-    "Godopka Team Name Pending": 6,
-    "Cheese Cape": 7,
+    "Workday Warriors": 6,
+    "The Adamant Watermelons": 7,
     "Sasa Loves Bingo": 8,
     "Drunk Chinchompa": 9,
     "Starship Enterprise": 10,
