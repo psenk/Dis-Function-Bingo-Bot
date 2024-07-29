@@ -10,12 +10,16 @@ import uuid
 
 CONNECTION_STRING = os.getenv("PG_CONNECTION_STRING")
 
-logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(filename="logs/query_tool.log", encoding="utf-8", mode="w")])
+logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(filename="logs/tools.log", encoding="utf-8", mode="w")])
 logger = logging.getLogger(__name__)
 
 
 class QueryTool:
-    def __init__(self):
+    def __init__(self) -> None:
+        """
+        QueryTool constructor
+        return: None
+        """
         self.pool = None
 
     async def __aenter__(self) -> "QueryTool":
@@ -24,7 +28,7 @@ class QueryTool:
         return: QueryTool Class instance
         """
         self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=10)
-        logger.info("QueryTool connection pool created.")
+        logger.info("Connection pool created.")
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
@@ -33,7 +37,7 @@ class QueryTool:
         return: None
         """
         await self.pool.close()
-        logger.info("QueryTool connection pool closed.")
+        logger.info("Connection pool closed.")
 
     async def execute(self, query: str, *args) -> None:
         """
