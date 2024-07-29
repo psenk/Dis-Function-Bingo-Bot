@@ -76,7 +76,7 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
     param task_id: int - bingo task number
     return: None
     """
-    await interaction.response.send_message(f"Task # {task_id}: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}")
+    await interaction.response.send_message(f"Task # {task_id}: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}", ephemeral=True)
     bot_logger.info(f"/task used by: {interaction.user.display_name}")
 
 @bot.tree.command(description="Kill the bot.")
