@@ -23,7 +23,7 @@ class ApproveTool(discord.ui.View):
         self.bot = bot
         self.page = 0
         self.purple = None
-        self.uuid = None
+        self.uuid_no = None
 
     async def create_approve_embed(self) -> None:
         """
@@ -46,6 +46,8 @@ class ApproveTool(discord.ui.View):
         """
         submission = self.submissions[self.page]
         approve_tool = discord.Embed(title=f"Submission Approval Tool", color=0xFFFF00)
+        msg = self.get_message(submission['message_id'], submission['team'])
+        approve_tool.set_image(url=msg.attachments[0].url)
         approve_tool.add_field(name="Submission", value=f"[HERE]({submission['jump_url']})", inline=True)
         approve_tool.add_field(name="Player", value=f"{submission['player']}", inline=True)
         approve_tool.add_field(name="", value="", inline=True)
@@ -137,8 +139,8 @@ class ApproveTool(discord.ui.View):
         if self.page >= len(self.submissions):
             self.page -= 1
         self.update_buttons()
-        async with QueryTool() as query_tool:
-            await query_tool.delete_submission(self.uuid)
+        async with QueryTool() as tool:
+            await tool.delete_submission(self.uuid_no)
         if self.submissions:
             new_embed = await self.populate_embed()
             await self.interaction.edit_original_response(embed=new_embed, view=self)

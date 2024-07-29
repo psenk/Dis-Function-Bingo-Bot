@@ -62,7 +62,6 @@ class SubmitTool(discord.ui.View):
         await log_tool.create_log_embed()
         # await interaction.response.edit_message(view=None)
         await self.message.delete()
-        print(f"{self.interaction.user.display_name} has submitted a task -> UUID {self.uuid_no.__str__()[:6]}.")
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
