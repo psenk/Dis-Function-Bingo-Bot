@@ -12,13 +12,11 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+from tools import ApproveTool as ApproveTool
+from tools import LogTool as LogTool
+from tools import QueryTool as QueryTool 
+from tools import SubmitTool as SubmitTool
 from utils import Choices, Constants, Functions
-from ApproveTool import ApproveTool
-from LogTool import LogTool
-from QueryTool import QueryTool
-from SubmitTool import SubmitTool
-from TeamOptionsTool import TeamOptionsTool
-from TeamsTool import TeamsTool
 from YesNoTool import YesNoTool
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
@@ -43,6 +41,7 @@ bot_logger.setLevel(logging.DEBUG)
 # ! TODO: finish task_submit for review
 
 ### * ADMIN COMMANDS
+
 
 @bot.tree.command(description="Displays bot help menu for bingo admins.")
 @app_commands.checks.has_role(Constants.BINGO_ADMIN_ROLE_ID)
@@ -76,6 +75,7 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
     """
     await interaction.response.send_message(f"Task # {task_id}: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}", ephemeral=True)
     bot_logger.info(f"/task used by: {interaction.user.display_name}")
+
 
 @bot.tree.command(description="Kill the bot.")
 @app_commands.guilds(Constants.GUILD)
@@ -154,7 +154,6 @@ async def help(interaction: discord.Interaction) -> None:
     bot_logger.info(f"/help used by: {interaction.user.display_name}")
 
 
-
 @bot.tree.command(description="Bingo butt!")
 @app_commands.guilds(Constants.GUILD)
 async def butt(interaction: discord.Interaction) -> None:
@@ -175,7 +174,6 @@ async def butt(interaction: discord.Interaction) -> None:
             word += i
     await interaction.response.send_message(word + "~,.")
     bot_logger.info(f"/butt used by: {interaction.user.display_name}")
-
 
 
 @bot.tree.command(description="Ram Ranch really rocks!")
@@ -329,7 +327,6 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
     bot_logger.info(f"/bonus used by: {interaction.user.display_name}")
-
 
 
 @bot.event

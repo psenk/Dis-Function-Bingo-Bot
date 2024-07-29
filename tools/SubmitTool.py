@@ -5,8 +5,8 @@ import discord
 import discord.ext
 import discord.ext.commands
 
-from LogTool import LogTool
-from QueryTool import QueryTool
+from tools.LogTool import LogTool
+from tools.QueryTool import QueryTool
 from utils import Constants, Functions
 
 

@@ -2,8 +2,8 @@ import logging
 import discord
 import discord.ext.commands
 from utils import Constants, Functions
-from QueryTool import QueryTool
-from SheetsTool import SheetsTool
+from tools.QueryTool import QueryTool
+from tools.SheetsTool import SheetsTool
 
 
 class ApproveTool(discord.ui.View):
