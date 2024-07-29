@@ -7,13 +7,14 @@ import discord.ext.commands
 
 from LogTool import LogTool
 from QueryTool import QueryTool
-from utils import Constants
+from utils import Constants, Functions
 
 
 class SubmitTool(discord.ui.View):
     def __init__(self, ctx: discord.ext.commands.Context, attachments: list, logs_channel: discord.TextChannel, task_id: int, team: str, uuid_no: uuid.UUID) -> None:
         """
         SubmitTool Constructor
+        param ctx: Discord Context instance
         param attachments: list - list of attachments
         param logs_channel: Discord TextChannel instance
         param task_id: int - bingo task number
@@ -22,6 +23,7 @@ class SubmitTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
+        self.logger = Functions.create_logger("tools")
         self.ctx = ctx
         self.attachments = attachments
         self.logs_channel = logs_channel
@@ -49,21 +51,24 @@ class SubmitTool(discord.ui.View):
         submit_tool.set_footer(text=self.uuid_no)
 
         self.message = await self.ctx.send(embed=submit_tool, view=self)
+        self.logger.info("create_submit_tool_embed finished.")
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green)
     async def submit_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         d = datetime.now()
         await interaction.followup.send(f"Submission for Bingo Task {self.task_id}: **{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}** was sent by {interaction.user.display_name} on {d.strftime('%Y-%m-%d at %H:%M:%S')}.")
-        
+
         async with QueryTool() as query_tool:
             await query_tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), task_id=self.task_id)
         log_tool = LogTool(self.ctx, self.logs_channel, self.team, d, self.uuid_no, task_id=self.task_id)
         await log_tool.create_log_embed()
         # await interaction.response.edit_message(view=None)
         await self.message.delete()
+        self.logger.info("submit_button finished.")
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_message("Submission cancelled.", delete_after=5.0)
         await self.message.delete()
+        self.logger.info("cancel_button finished.")
