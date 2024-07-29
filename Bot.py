@@ -32,19 +32,18 @@ intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 logging.basicConfig(level=logging.DEBUG, handlers=[logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")])
-discord_logger = logging.getLogger('discord')
+discord_logger = logging.getLogger("discord")
 bot_logger = logging.getLogger(__name__)
 
 # TODO: teams database?  expand!!
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
-# ! TODO: refresh sheets?
 # ! TODO: more robust error handling
 
 ### * ADMIN COMMANDS
 
 @bot.tree.command(description="Displays bot help menu for bingo admins.")
-@app_commands.checks.has_permissions(manage_guild=True)
+@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
 @app_commands.guilds(TEST_GUILD)
 async def helpadmin(interaction: discord.Interaction) -> None:
     """
@@ -64,7 +63,7 @@ async def helpadmin(interaction: discord.Interaction) -> None:
 
 @bot.tree.command(description="Display bingo task information.")
 @app_commands.describe(task_id="Bingo Task Number")
-@app_commands.checks.has_permissions(manage_guild=True)
+@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
 @app_commands.guilds(TEST_GUILD)
 async def task(interaction: discord.Interaction, task_id: int) -> None:
     """
@@ -77,7 +76,6 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
 
 
 @bot.tree.command(description="Kill the bot.")
-@app_commands.checks.has_permissions(manage_guild=True)
 @app_commands.guilds(TEST_GUILD)
 @commands.is_owner()
 async def kill(interaction: discord.Interaction) -> None:
@@ -92,7 +90,7 @@ async def kill(interaction: discord.Interaction) -> None:
 
 @bot.tree.command(description="Set day of bingo.")
 @app_commands.describe(day="Day of bingo")
-@app_commands.checks.has_permissions(manage_guild=True)
+@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
 @app_commands.guilds(TEST_GUILD)
 async def day(interaction: discord.Interaction, day: int) -> None:
     """
@@ -107,8 +105,10 @@ async def day(interaction: discord.Interaction, day: int) -> None:
 
     await interaction.followup.send(f"Day of bingo updated to: {day}")
 
+
 # ! NEED ROLE ADMIN!!!
 @bot.tree.command(description="Opens tool for reviewing active bingo submissions.")
+@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
 @app_commands.guilds(TEST_GUILD)
 async def approve(interaction: discord.Interaction) -> None:
     """
@@ -334,6 +334,7 @@ async def on_ready() -> None:
     await bot.tree.sync(guild=TEST_GUILD)
     bot_logger.info("Command tree synced.")
 
+
 # ? UNFINISHED CODE
 
 
@@ -356,7 +357,7 @@ async def auto_complete_day(interaction: discord.Interaction, current: str) -> L
 
 @test_submit.autocomplete("task")
 async def auto_complete_task(interaction: discord.Interaction, current: str) -> List[Choice[int]]:
-    day = interaction.data.get('options', [])[0].get('value')
+    day = interaction.data.get("options", [])[0].get("value")
     if day and day in Util.DAY_TASKS:
         return [choice for choice in Util.DAY_TASKS[day]]
     return []
