@@ -1,10 +1,9 @@
+import logging
 import discord
 import discord.ext.commands
-from utils import Constants
+from utils import Constants, Functions
 from QueryTool import QueryTool
 from SheetsTool import SheetsTool
-
-# GUILD_ID = 741153043776667658 # ! LIVE CODE
 
 
 class ApproveTool(discord.ui.View):
@@ -16,7 +15,7 @@ class ApproveTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
-        # submission_id, task_id, player, team, uuid_no, jump_url, message_id, date_submitted, purple
+        self.logger = Functions.create_logger("tools")        
         self.submissions = []
         self.interaction = interaction
         self.message = None
@@ -24,20 +23,22 @@ class ApproveTool(discord.ui.View):
         self.page = 0
         self.purple = None
         self.uuid_no = None
+        
 
     async def create_approve_embed(self) -> None:
         """
         Creates initial approve tool embed.
         return: None
         """
-        async with QueryTool() as query_tool:
-            self.submissions = await query_tool.get_submissions()
+        async with QueryTool() as tool:
+            self.submissions = await tool.get_submissions()
         if not self.submissions:
             await self.interaction.followup.send("There are no submissions to approve at this time.")
             return
         approve_tool = await self.populate_embed()
         self.update_buttons()
         self.message = await self.interaction.followup.send(embed=approve_tool, view=self)
+        self.logger.info("create_approve_embed finished.")
 
     async def populate_embed(self) -> discord.Embed:
         """
@@ -61,7 +62,8 @@ class ApproveTool(discord.ui.View):
         else:
             approve_tool.add_field(name="Bonus Task Purple", value=submission["purple"])
         approve_tool.set_footer(text=submission["uuid_no"])
-
+        
+        self.logger.info("populate_embed finished.")
         return approve_tool
 
     @discord.ui.button(label="<", style=discord.ButtonStyle.blurple, custom_id="left_task")
@@ -80,6 +82,7 @@ class ApproveTool(discord.ui.View):
             sheets_tool.add_purple(submission["player"])
         else:
             sheets_tool.update_sheets()
+        self.logger.info("approve_button finished.")
 
     @discord.ui.button(label="Reject", style=discord.ButtonStyle.red, custom_id="reject_task")
     async def reject_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -87,6 +90,7 @@ class ApproveTool(discord.ui.View):
         submission = self.submissions[self.page]
         task_id = submission["task_id"]
         await self.react_and_refresh(task_id, submission, approve=False, bonus=submission["purple"] is None)
+        self.logger.info("reject_button finished.")
 
     @discord.ui.button(label=">", style=discord.ButtonStyle.blurple, custom_id="right_task")
     async def right_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -102,6 +106,7 @@ class ApproveTool(discord.ui.View):
         self.right_button.disabled = self.page == len(self.submissions) - 1
         self.approve_button.disabled = len(self.submissions) == 0
         self.reject_button.disabled = len(self.submissions) == 0
+        self.logger.info("update_buttons finished.")
 
     async def get_message(self, message_id: int, team: str) -> discord.Message:
         """
@@ -110,9 +115,11 @@ class ApproveTool(discord.ui.View):
         param team: str - bingo team name
         return: Discord Message instance
         """
-
-        ch = self.bot.get_channel(Constants.TEST_SUBMISSION_CHANNELS.get(team))
-        return await ch.fetch_message(message_id)
+        try:
+            ch = self.bot.get_channel(Constants.TEST_SUBMISSION_CHANNELS.get(team))
+            return await ch.fetch_message(message_id)
+        except Exception as e:
+            self.logger.error(f"Error getting message: {e} ")
 
     async def react_and_refresh(self, task_id: int, submission: list, approve: bool = False, bonus: bool = False) -> None:
         """
@@ -128,6 +135,7 @@ class ApproveTool(discord.ui.View):
         await self.broadcast(msg, content)
         await msg.add_reaction(f"{'✅' if approve else '❌'}")
         await self.refresh()
+        self.logger.info("react_and_refresh finished.")
 
     async def refresh(self) -> None:
         """
@@ -145,6 +153,7 @@ class ApproveTool(discord.ui.View):
             await self.interaction.edit_original_response(embed=new_embed, view=self)
         else:
             await self.interaction.edit_original_response(content="No more submissions to review.", embed=None, view=None)
+        self.logger.info("refresh finished.")
 
     async def next_page(self, interaction: discord.Interaction, right: bool = False) -> None:
         """
@@ -157,6 +166,7 @@ class ApproveTool(discord.ui.View):
         new_embed = await self.populate_embed()
         self.update_buttons()
         await interaction.message.edit(embed=new_embed, view=self)
+        self.logger.info("next_page finished.")
 
     async def broadcast(self, msg: discord.Message, content: str) -> None:
         """
@@ -167,3 +177,4 @@ class ApproveTool(discord.ui.View):
         """
         await self.interaction.channel.send(content)
         await msg.channel.send(content)
+        self.logger.info("broadcast finished.")
