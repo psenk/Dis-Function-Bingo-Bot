@@ -7,10 +7,10 @@ from dotenv import load_dotenv
 from utils import Functions
 
 load_dotenv(override=True)
-import logging
 import uuid
 
 CONNECTION_STRING = os.getenv("PG_CONNECTION_STRING")
+
 
 class QueryTool:
     def __init__(self) -> None:
@@ -103,7 +103,7 @@ class QueryTool:
         d = datetime.now()
         query = "INSERT INTO submissions (task_id, player, team, uuid_no, jump_url, message_id, date_submitted, purple) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
         await self.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
-        logger.info("Task submitted.")
+        self.logger.info("Task submitted.")
 
     async def delete_submission(self, uuid_no: uuid.UUID) -> None:
         """
