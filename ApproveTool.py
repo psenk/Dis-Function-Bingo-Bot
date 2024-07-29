@@ -138,7 +138,7 @@ class ApproveTool(discord.ui.View):
             self.page -= 1
         self.update_buttons()
         async with QueryTool() as query_tool:
-            await query_tool.delete_submission(str(self.uuid))
+            await query_tool.delete_submission(self.uuid)
         if self.submissions:
             new_embed = await self.populate_embed()
             await self.interaction.edit_original_response(embed=new_embed, view=self)
