@@ -30,9 +30,14 @@ DB_PW = os.getenv("MYSQL_PW")
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
-logging.basicConfig(level=logging.DEBUG, handlers=[logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")])
-discord_logger = logging.getLogger("discord")
+
+disc_logger = logging.getLogger("discord")
+disc_handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")
+disc_handler.setLevel(logging.DEBUG)
+
 bot_logger = logging.getLogger(__name__)
+bot_handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")
+bot_logger.setLevel(logging.DEBUG)
 
 # TODO: teams database?  expand!!
 # ! TODO: reject task message?
