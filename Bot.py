@@ -12,7 +12,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-import Util
+from utils import Choices, Constants, Functions
 from ApproveTool import ApproveTool
 from LogTool import LogTool
 from QueryTool import QueryTool
@@ -26,7 +26,6 @@ GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
 DB_LOCALHOST = os.getenv("MYSQL_LOCALHOST")
 DB_USER_NAME = os.getenv("MYSQL_USER_NAME")
 DB_PW = os.getenv("MYSQL_PW")
-TEST_GUILD = discord.Object(969399636995493899)  # ! SWAP DURING LIVE BINGO
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -43,8 +42,8 @@ bot_logger = logging.getLogger(__name__)
 ### * ADMIN COMMANDS
 
 @bot.tree.command(description="Displays bot help menu for bingo admins.")
-@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
-@app_commands.guilds(TEST_GUILD)
+@app_commands.checks.has_role(Constants.BINGO_ADMIN_ROLE_ID)
+@app_commands.guilds(Constants.GUILD)
 async def helpadmin(interaction: discord.Interaction) -> None:
     """
     Shows list of commands available to bingo admins.
@@ -63,8 +62,8 @@ async def helpadmin(interaction: discord.Interaction) -> None:
 
 @bot.tree.command(description="Display bingo task information.")
 @app_commands.describe(task_id="Bingo Task Number")
-@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
-@app_commands.guilds(TEST_GUILD)
+@app_commands.checks.has_role(Constants.BINGO_ADMIN_ROLE_ID)
+@app_commands.guilds(Constants.GUILD)
 async def task(interaction: discord.Interaction, task_id: int) -> None:
     """
     Displays bingo task information.
@@ -72,11 +71,11 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
     param task_id: int - bingo task number
     return: None
     """
-    await interaction.response.send_message(f"Task # {task_id}: {Util.TASK_NUMBER_DICT.get(task_id)}")
+    await interaction.response.send_message(f"Task # {task_id}: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}")
     bot_logger.info(f"/task used by: {interaction.user.display_name}")
 
 @bot.tree.command(description="Kill the bot.")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 @commands.is_owner()
 async def kill(interaction: discord.Interaction) -> None:
     """
@@ -91,8 +90,8 @@ async def kill(interaction: discord.Interaction) -> None:
 
 @bot.tree.command(description="Set day of bingo.")
 @app_commands.describe(day="Day of bingo")
-@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
-@app_commands.guilds(TEST_GUILD)
+@app_commands.checks.has_role(Constants.BINGO_ADMIN_ROLE_ID)
+@app_commands.guilds(Constants.GUILD)
 async def day(interaction: discord.Interaction, day: int) -> None:
     """
     Updates the current day of the bingo.
@@ -108,8 +107,8 @@ async def day(interaction: discord.Interaction, day: int) -> None:
 
 
 @bot.tree.command(description="Opens tool for reviewing active bingo submissions.")
-@app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
-@app_commands.guilds(TEST_GUILD)
+@app_commands.checks.has_role(Constants.BINGO_ADMIN_ROLE_ID)
+@app_commands.guilds(Constants.GUILD)
 async def approve(interaction: discord.Interaction) -> None:
     """
     Opens tool for reviewing active bingo submissions.
@@ -117,7 +116,7 @@ async def approve(interaction: discord.Interaction) -> None:
     return: None
     """
     # is this admin channel?
-    if interaction.channel_id != Util.TEST_ADMIN_CHANNEL_ID:
+    if interaction.channel_id != Constants.TEST_ADMIN_CHANNEL_ID:
         await interaction.response.send_message("This command can only be used in the admin channel.", ephemeral=True)
         return
     global bot
@@ -131,7 +130,7 @@ async def approve(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(description="Displays bot help menu.")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 async def help(interaction: discord.Interaction) -> None:
     """
     Shows help menu for normal users.
@@ -154,7 +153,7 @@ async def help(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(description="Bingo butt!")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 async def butt(interaction: discord.Interaction) -> None:
     """
     Ping pong command as bingo butt.  Sith tradition.
@@ -177,7 +176,7 @@ async def butt(interaction: discord.Interaction) -> None:
 
 
 @bot.tree.command(description="Ram Ranch really rocks!")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 async def ranch(interaction: discord.Interaction) -> None:
     """
     Ping pong command as ram ranch image.  Custom command.
@@ -190,7 +189,7 @@ async def ranch(interaction: discord.Interaction) -> None:
 
 @bot.tree.command(description="Submit a bingo task for approval.")
 @app_commands.describe(task_id="Bingo task number")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 async def submit(interaction: discord.Interaction, task_id: int) -> None:
     """
     Submits bingo task to bingo team for approval.
@@ -202,7 +201,7 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
     await interaction.response.defer()
     global bot
 
-    team = Util.get_user_team(interaction.user.roles)
+    team = Functions.get_user_team(interaction.user.roles)
 
     # is user in bingo?
     if team is None:
@@ -210,12 +209,12 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
         return
 
     # is this users submission channel?
-    if interaction.channel_id != Util.TEST_SUBMISSION_CHANNELS.get(team):
+    if interaction.channel_id != Constants.TEST_SUBMISSION_CHANNELS.get(team):
         await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
         return
 
     # is this a valid task number?
-    if not Util.check_task_id(task_id):
+    if not Functions.check_task_id(task_id):
         await interaction.followup.send("Invalid task id!", ephemeral=True)
         return
 
@@ -240,7 +239,7 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
     uuid_no = uuid.uuid1()
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
 
-    logs_channel = bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID)
+    logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
     ctx = await bot.get_context(message)
     submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
     await submit_tool.create_submit_tool_embed()
@@ -249,8 +248,8 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
 
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
 @app_commands.describe(purple="Name of item received", date="Date of bonus submission on screenshot, format MM-DD-YY", time="Time of bonus submission on screenshot, format HH:MM (24-hr)", player="Name of player that received the purple")
-@app_commands.choices(purple=Util.COX_PURPLES)
-@app_commands.guilds(TEST_GUILD)
+@app_commands.choices(purple=Choices.COX_PURPLES)
+@app_commands.guilds(Constants.GUILD)
 async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member) -> None:
     """
     Submits a bonus task to bingo admins for approval.
@@ -265,24 +264,24 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
     await interaction.response.defer()
 
     # is user in bingo?
-    if Util.get_user_team(interaction.user.roles) == None:
+    if Functions.get_user_team(interaction.user.roles) == None:
         await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
         return
 
     # is player in bingo?
-    if Util.get_user_team(player.roles) == None:
+    if Functions.get_user_team(player.roles) == None:
         await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n*Hint: press Up Arrow to try again.*", ephemeral=True)
         return
 
-    team = Util.get_user_team(player.roles)
+    team = Functions.get_user_team(player.roles)
 
     # is this users submission channel?
-    if interaction.channel_id != Util.TEST_SUBMISSION_CHANNELS.get(team):
+    if interaction.channel_id != Constants.TEST_SUBMISSION_CHANNELS.get(team):
         await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
         return
 
     # validate date/time format
-    if not await Util.validate_data(interaction, date=date, time=time):
+    if not await Functions.validate_data(interaction, date=date, time=time):
         await interaction.followup.send("Date/Time error!", ephemeral=True)
         return
 
@@ -315,14 +314,14 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     await confirm_message.delete()
     uuid_bonus = uuid.uuid1()
-    date = datetime.strptime(date, Util.DATE_FORMAT).date()
-    time = datetime.strptime(time, Util.TIME_FORMAT).time()
+    date = datetime.strptime(date, Functions.DATE_FORMAT).date()
+    time = datetime.strptime(time, Functions.TIME_FORMAT).time()
     date_bonus = datetime.combine(date, time)
 
     async with QueryTool() as tool:
         await tool.submit_task(player.display_name, team, uuid_bonus, message.jump_url, str(message.id), purple=purple.name)
         ctx = await bot.get_context(confirm_message)
-        log_tool = LogTool(ctx, bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
+        log_tool = LogTool(ctx, bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
         await log_tool.create_log_embed()
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
@@ -336,10 +335,10 @@ async def on_ready() -> None:
     This code runs every time the bot boots up,
     return: None
     """
-    await bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID).send("Foki Bot online!")
+    await bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID).send("Foki Bot online!")
     print("Bingo Bot online.")
     bot_logger.info("Foki Bot online.")
-    await bot.tree.sync(guild=TEST_GUILD)
+    await bot.tree.sync(guild=Constants.GUILD)
     bot_logger.info("Command tree synced.")
 
 
@@ -350,24 +349,25 @@ async def on_ready() -> None:
 #! docs
 @bot.tree.command(description="Test submission")
 @app_commands.describe(day="What board is the task on?", task="Which task are you trying to complete?")
-@app_commands.guilds(TEST_GUILD)
+@app_commands.guilds(Constants.GUILD)
 async def test_submit(interaction: discord.Interaction, day: int, task: int) -> None:
     await interaction.response.send_message(f"Selected day: {day}, task: {task}")
+    bot_logger.info(f"/test_submit command used by {interaction.user.display_name}")
 
 
 @test_submit.autocomplete("day")
 async def auto_complete_day(interaction: discord.Interaction, current: str) -> List[Choice[int]]:
     async with QueryTool() as tool:
         day = await tool.get_day()
-    choices = [choice for choice in Util.DAY_AND_BOARD if choice.value <= day]
+    choices = [choice for choice in Choices.DAY_AND_BOARD if choice.value <= day]
     return choices
 
 
 @test_submit.autocomplete("task")
 async def auto_complete_task(interaction: discord.Interaction, current: str) -> List[Choice[int]]:
     day = interaction.data.get("options", [])[0].get("value")
-    if day and day in Util.DAY_TASKS:
-        return [choice for choice in Util.DAY_TASKS[day]]
+    if day and day in Choices.DAY_TASKS:
+        return [choice for choice in Choices.DAY_TASKS[day]]
     return []
 
 
@@ -382,7 +382,7 @@ async def teams(ctx: commands.Context) -> None:
     return: None
     """
     print(f"Teams command used by: {ctx.author}")
-    if not Util.is_admin(ctx):
+    if not Functions.is_admin(ctx):
         await ctx.send("You are not authorized to use this command!")
         return
     async with QueryTool() as tool:

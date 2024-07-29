@@ -5,9 +5,9 @@ import discord
 import discord.ext
 import discord.ext.commands
 
-import Util
 from LogTool import LogTool
 from QueryTool import QueryTool
+from utils import Constants
 
 
 class SubmitTool(discord.ui.View):
@@ -35,7 +35,7 @@ class SubmitTool(discord.ui.View):
         Creates submission tool embed.
         return: None
         """
-        description = f"""You are attempting to submit: **Task #{self.task_id}\n{Util.TASK_NUMBER_DICT.get(self.task_id)}**
+        description = f"""You are attempting to submit: **Task #{self.task_id}\n{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}**
         for the Team: **{self.team}**.\nIs this correct?\n
         Please ensure your submission contains:
         o  The bingo codeword plugin
@@ -54,7 +54,7 @@ class SubmitTool(discord.ui.View):
     async def submit_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         d = datetime.now()
-        await interaction.followup.send(f"Submission for Bingo Task {self.task_id}: **{Util.TASK_NUMBER_DICT.get(self.task_id)}** was sent by {interaction.user.display_name} on {d.strftime('%Y-%m-%d at %H:%M:%S')}.")
+        await interaction.followup.send(f"Submission for Bingo Task {self.task_id}: **{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}** was sent by {interaction.user.display_name} on {d.strftime('%Y-%m-%d at %H:%M:%S')}.")
         
         async with QueryTool() as query_tool:
             await query_tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), task_id=self.task_id)

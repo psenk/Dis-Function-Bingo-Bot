@@ -5,7 +5,7 @@ import discord
 import discord.ext
 import discord.ext.commands
 
-import Util
+from utils import Constants
 
 
 class LogTool(discord.ui.View):
@@ -13,7 +13,7 @@ class LogTool(discord.ui.View):
         """
         LogTool Constructor
         param ctx: Discord Context instance
-        param logs_channel: Discord TextChannel 
+        param logs_channel: Discord TextChannel
         param multi: bool - multiple submissions
         param team: str - bingo team name
         param timestamp: timestamp of submission
@@ -41,14 +41,14 @@ class LogTool(discord.ui.View):
         param task_id: int - optional, id # of bingo task
         return: None
         """
-        
+
         log_embed = discord.Embed(title="Submission Received", color=0xFFFF00)
         log_embed.set_author(name="Link to Submission", url=self.ctx.message.jump_url)
 
         log_embed.add_field(name="Team", value=self.team, inline=True)
         log_embed.add_field(name="Player", value=self.ctx.author.display_name, inline=True)
         log_embed.add_field(name="", value="", inline=True)
-        log_embed.add_field(name="Task", value=f"{'Bonus' if self.task_id else Util.TASK_NUMBER_DICT.get(self.task_id)}")
+        log_embed.add_field(name="Task", value=f"{'Bonus' if self.task_id else Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}")
         log_embed.add_field(name="Submitted on", value=self.timestamp, inline=True)
         log_embed.add_field(name="", value="", inline=True)
         log_embed.set_footer(text=self.uuid_no)

@@ -1,6 +1,6 @@
 import datetime
 import gspread
-import Util
+import utils.Functions as Functions
 
 class SheetsTool():
     
@@ -51,7 +51,7 @@ class SheetsTool():
         """
         book = SheetsTool.connect_to_google()
         worksheet = book.worksheet('Master')
-        worksheet.update_cell(self.task_id + 4, Util.TEAMS_SHEETS_COLUMN_DICT.get(self.team), 'Complete')
+        worksheet.update_cell(self.task_id + 4, Functions.TEAMS_SHEETS_COLUMN_DICT.get(self.team), 'Complete')
         
     def add_purple(self, player: str) -> None:
         """
