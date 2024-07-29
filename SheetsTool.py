@@ -40,7 +40,7 @@ class SheetsTool():
         """
         try:
             # team, date, time, author
-            book = self.connect_to_google(self)
+            book = self.connect_to_google()
             worksheet = book.worksheet(self.team)
             
             # posted date
@@ -51,7 +51,7 @@ class SheetsTool():
             # posted by
             worksheet.update_cell(self.task_id + 4, 9, self.poster)
             
-            self.update_master_sheet(self)
+            self.update_master_sheet()
             self.logger.info("update_sheets finished.")
         except Exception as e:
             self.logger.error(f"Error updating sheets -> {e}", exc_info=True)
@@ -63,7 +63,7 @@ class SheetsTool():
         return: None
         """
         try:
-            book = self.connect_to_google(self)
+            book = self.connect_to_google()
             worksheet = book.worksheet('Master')
             worksheet.update_cell(self.task_id + 4, Constants.TEAMS_SHEETS_COLUMN_DICT.get(self.team), 'Complete')
             self.logger.info("update_master_sheet finished.")
@@ -79,7 +79,7 @@ class SheetsTool():
         """
         try:
             # 5 = Purple, 6 = Date, 7 = Time, 8 = Player
-            book = self.connect_to_google(self)
+            book = self.connect_to_google()
             worksheet = book.worksheet(self.team)
             values = ["", "", "", "", self.purple, self.d.date().strftime('%d-%b-%Y'), self.d.time().strftime('%H:%M'), player]
             worksheet.insert_row(values, index=71)

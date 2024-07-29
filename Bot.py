@@ -38,6 +38,9 @@ bot_logger.setLevel(logging.DEBUG)
 # TODO: teams database?  expand!!
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
+# ! TODO: validation.py
+# ! TODO: improve embed designs?
+# ! TODO: finish task_submit for review
 
 ### * ADMIN COMMANDS
 
@@ -270,7 +273,7 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     # is player in bingo?
     if Functions.get_user_team(player.roles) == None:
-        await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n*Hint: press Up Arrow to try again.*", ephemeral=True)
+        await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n", ephemeral=True)
         return
 
     team = Functions.get_user_team(player.roles)
