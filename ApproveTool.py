@@ -119,7 +119,7 @@ class ApproveTool(discord.ui.View):
             ch = self.bot.get_channel(Constants.TEST_SUBMISSION_CHANNELS.get(team))
             return await ch.fetch_message(message_id)
         except Exception as e:
-            self.logger.error(f"Error getting message: {e} ")
+            self.logger.error(f"Error getting message -> {e} ")
 
     async def react_and_refresh(self, task_id: int, submission: list, approve: bool = False, bonus: bool = False) -> None:
         """

@@ -30,7 +30,7 @@ class SheetsTool():
             self.logger.info("Connecting to Google Sheets.")
             return gspread.service_account(filename='bingobonanza-b9bddbaa451d.json').open_by_key('1NTA9T3I_zaln0foXbCULhw7WVzunyPbNfafpEjwnjiU')
         except Exception as e:
-            self.logger.error(f"Error connecting to Google Sheets: {e}", exc_info=True)
+            self.logger.error(f"Error connecting to Google Sheets -> {e}", exc_info=True)
             raise
     
     def update_sheets(self) -> None:
@@ -54,7 +54,7 @@ class SheetsTool():
             self.update_master_sheet(self)
             self.logger.info("update_sheets finished.")
         except Exception as e:
-            self.logger.error(f"Error updating sheets: {e}", exc_info=True)
+            self.logger.error(f"Error updating sheets -> {e}", exc_info=True)
             raise
         
     def update_master_sheet(self) -> None:
@@ -68,7 +68,7 @@ class SheetsTool():
             worksheet.update_cell(self.task_id + 4, Constants.TEAMS_SHEETS_COLUMN_DICT.get(self.team), 'Complete')
             self.logger.info("update_master_sheet finished.")
         except Exception as e:
-            self.logger.error(f"Error updating master sheet: {e}", exc_info=True)
+            self.logger.error(f"Error updating master sheet -> {e}", exc_info=True)
             raise
         
     def add_purple(self, player: str) -> None:
@@ -87,5 +87,5 @@ class SheetsTool():
             worksheet.update_acell("D71", formula)
             self.logger.info("add_purple finished.")
         except Exception as e:
-            self.logger.error(f"Error adding purple: {e}", exc_info=True)
+            self.logger.error(f"Error adding purple -> {e}", exc_info=True)
             raise

@@ -51,7 +51,7 @@ class QueryTool:
                     await connection.execute(query, *args)
             self.logger.info("Query executed successfully.")
         except Exception as e:
-            self.logger.error(f"Error executing query: {e}", exc_info=True)
+            self.logger.error(f"Error executing query -> {e}", exc_info=True)
             raise
 
     async def fetch(self, query: str, *args) -> list:
@@ -65,7 +65,7 @@ class QueryTool:
             async with self.pool.acquire() as connection:
                 return await connection.fetch(query, *args)
         except Exception as e:
-            self.logger.error(f"Error fetching data: {e}", exc_info=True)
+            self.logger.error(f"Error fetching data -> {e}", exc_info=True)
             raise
 
     async def fetchval(self, query: str, *args) -> any:
@@ -79,7 +79,7 @@ class QueryTool:
             async with self.pool.acquire() as connection:
                 return await connection.fetchval(query, *args)
         except Exception as e:
-            self.logger.error(f"Error fetching value: {e}", exc_info=True)
+            self.logger.error(f"Error fetching value -> {e}", exc_info=True)
             raise
 
     async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None) -> None:
@@ -105,7 +105,7 @@ class QueryTool:
         param uuid_no: str - UUID of task
         return: None
         """
-        query = "DELETE FROM submissions WHERE uuid_no = $1;"
+        query = "DELETE FROM submissions WHERE uuid_no = '$1';"
         await self.execute(query, uuid_no)
         self.logger.info("Submission deleted.")
 
