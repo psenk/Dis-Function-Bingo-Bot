@@ -4,15 +4,13 @@ from datetime import datetime
 import asyncpg
 from dotenv import load_dotenv
 
+from utils import Functions
+
 load_dotenv(override=True)
 import logging
 import uuid
 
 CONNECTION_STRING = os.getenv("PG_CONNECTION_STRING")
-
-logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(filename="logs/tools.log", encoding="utf-8", mode="w")])
-logger = logging.getLogger(__name__)
-
 
 class QueryTool:
     def __init__(self) -> None:
@@ -20,6 +18,7 @@ class QueryTool:
         QueryTool constructor
         return: None
         """
+        self.logger = Functions.create_logger("tools")
         self.pool = None
 
     async def __aenter__(self) -> "QueryTool":
@@ -28,7 +27,7 @@ class QueryTool:
         return: QueryTool Class instance
         """
         self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=10)
-        logger.info("Connection pool created.")
+        self.logger.info("Connection pool created.")
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
@@ -37,7 +36,7 @@ class QueryTool:
         return: None
         """
         await self.pool.close()
-        logger.info("Connection pool closed.")
+        self.logger.info("Connection pool closed.")
 
     async def execute(self, query: str, *args) -> None:
         """
@@ -50,11 +49,11 @@ class QueryTool:
             async with self.pool.acquire() as connection:
                 async with connection.transaction():
                     await connection.execute(query, *args)
-            logger.info("Query executed successfully.")
+            self.logger.info("Query executed successfully.")
         except Exception as e:
-            logger.error(f"Error executing query: {e}")
-            logger.error(f"Query: {query}")
-            logger.error(f"Args: {args}")
+            self.logger.error(f"Error executing query: {e}")
+            self.logger.error(f"Query: {query}")
+            self.logger.error(f"Args: {args}")
             raise
 
     async def fetch(self, query: str, *args) -> list:
@@ -68,9 +67,9 @@ class QueryTool:
             async with self.pool.acquire() as connection:
                 return await connection.fetch(query, *args)
         except Exception as e:
-            logger.error(f"Error fetching data: {e}")
-            logger.error(f"Query: {query}")
-            logger.error(f"Args: {args}")
+            self.logger.error(f"Error fetching data: {e}")
+            self.logger.error(f"Query: {query}")
+            self.logger.error(f"Args: {args}")
             raise
 
     async def fetchval(self, query: str, *args) -> any:
@@ -84,9 +83,9 @@ class QueryTool:
             async with self.pool.acquire() as connection:
                 return await connection.fetchval(query, *args)
         except Exception as e:
-            logger.error(f"Error fetching value: {e}")
-            logger.error(f"Query: {query}")
-            logger.error(f"Args: {args}")
+            self.logger.error(f"Error fetching value: {e}")
+            self.logger.error(f"Query: {query}")
+            self.logger.error(f"Args: {args}")
             raise
 
     async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None) -> None:
@@ -114,7 +113,7 @@ class QueryTool:
         """
         query = "DELETE FROM submissions WHERE uuid_no = $1;"
         await self.execute(query, uuid_no)
-        logger.info("Submission deleted.")
+        self.logger.info("Submission deleted.")
 
     async def get_submissions(self) -> list:
         """
@@ -123,7 +122,7 @@ class QueryTool:
         """
         query = "SELECT * FROM submissions;"
         submissions = await self.fetch(query)
-        logger.info("Submissions retrieved.")
+        self.logger.info("Submissions retrieved.")
         return submissions
 
     async def update_day(self, day: int) -> int:
@@ -134,7 +133,7 @@ class QueryTool:
         """
         query = "UPDATE settings SET bingo_day = $1;"
         await self.execute(query, day)
-        logger.info("Bingo day updated.")
+        self.logger.info("Bingo day updated.")
         return day
 
     async def get_day(self) -> int:
@@ -144,7 +143,7 @@ class QueryTool:
         """
         query = "SELECT bingo_day FROM settings;"
         day = await self.fetchval(query)
-        logger.info("Retrieved bingo day.")
+        self.logger.info("Retrieved bingo day.")
         return day
 
     # ? For future database growth
@@ -156,7 +155,7 @@ class QueryTool:
         """
         query = "SELECT * FROM teams;"
         teams = await self.fetch(query)
-        logger.info("Teams retrieved.")
+        self.logger.info("Teams retrieved.")
         return teams
 
     async def get_team(self, team: str) -> list:
@@ -167,7 +166,7 @@ class QueryTool:
         """
         query = "SELECT * FROM teams WHERE team_name = $1;"
         teams = await self.fetch(query, team)
-        logger.info("Team retrieved.")
+        self.logger.info("Team retrieved.")
         return teams
 
     async def update_team_info(self, team: str, col: str, old_data: str, new_data: str) -> None:
@@ -181,4 +180,4 @@ class QueryTool:
         """
         query = f"UPDATE teams SET {col} = $1 WHERE {col} = $2 AND team_name = $3;"
         await self.execute(query, new_data, old_data, team)
-        logger.info(f"Team info updated: {col} -> {new_data}")
+        self.logger.info(f"Team info updated: {col} -> {new_data}")
