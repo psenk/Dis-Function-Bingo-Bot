@@ -5,10 +5,13 @@ import asyncpg
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+import logging
 import uuid
 
 CONNECTION_STRING = os.getenv("PG_CONNECTION_STRING")
 
+logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(filename="logs/query_tool.log", encoding="utf-8", mode="w")])
+logger = logging.getLogger(__name__)
 
 class QueryTool:
     def __init__(self):
@@ -20,7 +23,7 @@ class QueryTool:
         return: QueryTool Class instance
         """
         self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=10)
-        print("Pool created.")
+        logger.info(f"QueryTool connection pool created.")
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
@@ -29,7 +32,51 @@ class QueryTool:
         return: None
         """
         await self.pool.close()
-        print("Pool closed.")
+        logger.info(f"QueryTool connection pool closed.")
+
+    async def execute(self, query: str, *args) -> None:
+        """
+        Executes a database query without returning results.
+        param query: str - SQL query
+        param args: arguments for the SQL query
+        return: None
+        """
+        try:
+            async with self.pool.acquire() as connection:
+                async with connection.transaction():
+                    await connection.execute(query, *args)
+            logger.info("Query executed successfully.")
+        except Exception as e:
+            logger.error(f"Error executing query: {e}")
+            raise
+            
+    async def fetch(self, query: str, *args) -> list:
+        """
+        Executes a query and returns multiple rows.
+        param query: str - SQL query
+        param args: arguments for the SQL query
+        return: list - rows returned by the query
+        """
+        try:
+            async with self.pool.acquire() as connection:
+                return await connection.fetch(query, *args)
+        except Exception as e:
+            logger.error(f"Error fetching data: {e}")
+            raise
+            
+    async def fetchval(self, query: str, *args) -> any:
+        """
+        Executes a query and returns a single value.
+        param query: str - SQL query
+        param args: arguments for the SQL query
+        return: any - value returned by the query
+        """
+        try:
+            async with self.pool.acquire() as connection:
+                return await connection.fetchval(query, *args)
+        except Exception as e:
+            logger.error(f"Error fetching value: {e}")
+            raise
 
     async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None) -> None:
         """
@@ -37,7 +84,7 @@ class QueryTool:
         param player: str - name of bingo player
         param team: str - name of bingo team
         param uuid_no - UUID instance
-        param jump_url - str - URL to submission # ! CAN THIS BE REPLACED WITH MESSAGE_ID?
+        param jump_url - str - URL to submission
         param message_id: str - id of Discord submission post
         param purple: optional, item for bonus submission
         param task_id: optional, bingo task id
@@ -45,11 +92,8 @@ class QueryTool:
         """
         d = datetime.now()
         query = "INSERT INTO submissions (task_id, player, team, uuid_no, jump_url, message_id, date_submitted, purple) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
-
-        async with self.pool.acquire() as connection:
-            async with connection.transaction():
-                await connection.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
-        print("Task submitted, connection closed.")
+        await self.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
+        logger.info("Task submitted.")
 
     async def delete_submission(self, uuid: str) -> None:
         """
@@ -58,23 +102,17 @@ class QueryTool:
         return: None
         """
         query = "DELETE FROM submissions WHERE uuid = $1;"
-
-        async with self.pool.acquire() as connection:
-            async with connection.transaction():
-                await connection.execute(query, uuid.strip())
-        print("Submission deleted, connection closed.")
+        await self.execute(query, uuid.strip())
+        logger.info("Submission deleted.")
 
     async def get_submissions(self) -> list:
         """
         Retrieves all submissions from database.
         return: list - list of submissions
         """
-
         query = "SELECT * FROM submissions;"
-
-        async with self.pool.acquire() as connection:
-            submissions = await connection.fetch(query)
-        print("Submissions retrieved, connection closed.")
+        submissions = await self.fetch(query)
+        logger.info("Submissions retrieved.")
         return submissions
 
     async def update_day(self, day: int) -> int:
@@ -84,11 +122,8 @@ class QueryTool:
         return: int - day of bingo
         """
         query = "UPDATE settings SET bingo_day = $1;"
-
-        async with self.pool.acquire() as connection:
-            async with connection.transaction():
-                await connection.execute(query, day)
-        print("Bingo day updated, connection closed.")
+        await self.execute(query, day)
+        logger.info("Bingo day updated.")
         return day
 
     async def get_day(self) -> int:
@@ -96,12 +131,9 @@ class QueryTool:
         Retrieve day of bingo from settings.
         return: int - day of bingo
         """
-
         query = "SELECT bingo_day FROM settings;"
-
-        async with self.pool.acquire() as connection:
-            day = await connection.fetchval(query)
-        print("Retrieved bingo day, connection closed.")
+        day = await self.fetchval(query)
+        logger.info("Retrieved bingo day.")
         return day
 
     # ? For future database growth
@@ -111,12 +143,9 @@ class QueryTool:
         Retrieve all teams + info from database.
         return: list - list of teams + info
         """
-
         query = "SELECT * FROM teams;"
-
-        async with self.pool.acquire() as connection:
-            teams = await connection.fetch(query)
-        print("Teams retrieved, connection closed.")
+        teams = await self.fetch(query)
+        logger.info("Teams retrieved.")
         return teams
 
     async def get_team(self, team: str) -> list:
@@ -125,12 +154,9 @@ class QueryTool:
         param team: str - name of bingo team
         return: list - list of team + info
         """
-
         query = "SELECT * FROM teams WHERE team_name = $1;"
-
-        async with self.pool.acquire() as connection:
-            teams = await connection.fetch(query, team)
-        print("Team retrieved, connection closed.")
+        teams = await self.fetch(query, team)
+        logger.info("Team retrieved.")
         return teams
 
     async def update_team_info(self, team: str, col: str, old_data: str, new_data: str) -> None:
@@ -143,9 +169,5 @@ class QueryTool:
         return: None
         """
         query = f"UPDATE teams SET {col} = $1 WHERE {col} = $2 AND team_name = $3;"
-        print(f"Col: {col}")
-        print(f"Old data: {old_data}, New data: {new_data}")
-        async with self.pool.acquire() as connection:
-            async with connection.transaction():
-                await connection.execute(query, new_data, old_data, team)
-        print(f"Team record updated: {col} -> {new_data}")
+        await self.execute(query, new_data, old_data, team)
+        logger.info(f"Team info updated: {col} -> {new_data}")
