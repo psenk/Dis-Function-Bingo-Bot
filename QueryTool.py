@@ -24,7 +24,7 @@ class QueryTool:
         return: QueryTool Class instance
         """
         self.pool = await asyncpg.create_pool(dsn=CONNECTION_STRING, min_size=2, max_size=10)
-        logger.info(f"QueryTool connection pool created.")
+        logger.info("QueryTool connection pool created.")
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
@@ -33,7 +33,7 @@ class QueryTool:
         return: None
         """
         await self.pool.close()
-        logger.info(f"QueryTool connection pool closed.")
+        logger.info("QueryTool connection pool closed.")
 
     async def execute(self, query: str, *args) -> None:
         """
@@ -49,6 +49,8 @@ class QueryTool:
             logger.info("Query executed successfully.")
         except Exception as e:
             logger.error(f"Error executing query: {e}")
+            logger.error(f"Query: {query}")
+            logger.error(f"Args: {args}")
             raise
 
     async def fetch(self, query: str, *args) -> list:
@@ -63,6 +65,8 @@ class QueryTool:
                 return await connection.fetch(query, *args)
         except Exception as e:
             logger.error(f"Error fetching data: {e}")
+            logger.error(f"Query: {query}")
+            logger.error(f"Args: {args}")
             raise
 
     async def fetchval(self, query: str, *args) -> any:
@@ -77,6 +81,8 @@ class QueryTool:
                 return await connection.fetchval(query, *args)
         except Exception as e:
             logger.error(f"Error fetching value: {e}")
+            logger.error(f"Query: {query}")
+            logger.error(f"Args: {args}")
             raise
 
     async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None) -> None:

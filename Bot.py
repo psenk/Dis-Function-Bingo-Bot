@@ -53,12 +53,12 @@ async def helpadmin(interaction: discord.Interaction) -> None:
     """
     help_embed = discord.Embed(title="Foki Bot Admin Commands", color=0xFFFF00)
     help_embed.set_thumbnail(url=bot.user.avatar.url)
-    help_embed.add_field(name="/approve", value="Opens tool for reviewing active bingo submissions.", inline=True)
+    help_embed.add_field(name="/approve", value="Opens tool for reviewing active bingo submissions.\nOnly usable in the bingo admin channel.", inline=True)
     help_embed.add_field(name="/day X", value="Set day of bingo to X.", inline=True)
     help_embed.add_field(name="", value="", inline=True)
     help_embed.add_field(name="/task", value="Display bingo task information.", inline=True)
-
     await interaction.response.send_message(embed=help_embed)
+    bot_logger.info(f"/helpadmin used by: {interaction.user.display_name}")
 
 
 @bot.tree.command(description="Display bingo task information.")
@@ -73,7 +73,7 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
     return: None
     """
     await interaction.response.send_message(f"Task # {task_id}: {Util.TASK_NUMBER_DICT.get(task_id)}")
-
+    bot_logger.info(f"/task used by: {interaction.user.display_name}")
 
 @bot.tree.command(description="Kill the bot.")
 @app_commands.guilds(TEST_GUILD)
@@ -85,6 +85,7 @@ async def kill(interaction: discord.Interaction) -> None:
     return: None
     """
     await interaction.response.send_message("Later nerds.")
+    bot_logger.info(f"/kill used by: {interaction.user.display_name}")
     await bot.close()
 
 
@@ -102,11 +103,10 @@ async def day(interaction: discord.Interaction, day: int) -> None:
     await interaction.response.defer()
     async with QueryTool() as tool:
         day = await tool.update_day(day)
-
     await interaction.followup.send(f"Day of bingo updated to: {day}")
+    bot_logger.info(f"/day used by: {interaction.user.display_name}")
 
 
-# ! NEED ROLE ADMIN!!!
 @bot.tree.command(description="Opens tool for reviewing active bingo submissions.")
 @app_commands.checks.has_role(Util.BINGO_ADMIN_ROLE_ID)
 @app_commands.guilds(TEST_GUILD)
@@ -124,6 +124,7 @@ async def approve(interaction: discord.Interaction) -> None:
     await interaction.response.defer()
     approve_tool = ApproveTool(interaction, bot)
     await approve_tool.create_approve_embed()
+    bot_logger.info(f"/approve used by: {interaction.user.display_name}")
 
 
 ### * USER COMMANDS
@@ -148,6 +149,8 @@ async def help(interaction: discord.Interaction) -> None:
     help_embed.add_field(name="/ranch", value="Ram Ranch really rocks!", inline=True)
 
     await interaction.response.send_message(embed=help_embed)
+    bot_logger.info(f"/help used by: {interaction.user.display_name}")
+
 
 
 @bot.tree.command(description="Bingo butt!")
@@ -169,6 +172,8 @@ async def butt(interaction: discord.Interaction) -> None:
         else:
             word += i
     await interaction.response.send_message(word + "~,.")
+    bot_logger.info(f"/butt used by: {interaction.user.display_name}")
+
 
 
 @bot.tree.command(description="Ram Ranch really rocks!")
@@ -180,9 +185,9 @@ async def ranch(interaction: discord.Interaction) -> None:
     return: None
     """
     await interaction.response.send_message("https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&")
+    bot_logger.info(f"/ranch used by: {interaction.user.display_name}")
 
 
-# ! As days/dropdowns?  e.g Day 4 - Task 7
 @bot.tree.command(description="Submit a bingo task for approval.")
 @app_commands.describe(task_id="Bingo task number")
 @app_commands.guilds(TEST_GUILD)
@@ -239,6 +244,7 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
     ctx = await bot.get_context(message)
     submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
     await submit_tool.create_submit_tool_embed()
+    bot_logger.info(f"/submit used by: {interaction.user.display_name}")
 
 
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
@@ -320,6 +326,8 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
         await log_tool.create_log_embed()
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
+    bot_logger.info(f"/bonus used by: {interaction.user.display_name}")
+
 
 
 @bot.event
