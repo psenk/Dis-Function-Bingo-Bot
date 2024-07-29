@@ -319,8 +319,8 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     await confirm_message.delete()
     uuid_bonus = uuid.uuid1()
-    date = datetime.strptime(date, Functions.DATE_FORMAT).date()
-    time = datetime.strptime(time, Functions.TIME_FORMAT).time()
+    date = datetime.strptime(date, Constants.DATE_FORMAT).date()
+    time = datetime.strptime(time, Constants.TIME_FORMAT).time()
     date_bonus = datetime.combine(date, time)
 
     async with QueryTool() as tool:
