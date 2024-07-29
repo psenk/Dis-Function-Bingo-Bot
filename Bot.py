@@ -31,10 +31,6 @@ intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-disc_logger = logging.getLogger("discord")
-disc_handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")
-disc_handler.setLevel(logging.DEBUG)
-
 bot_logger = logging.getLogger(__name__)
 bot_handler = logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w")
 bot_logger.setLevel(logging.DEBUG)
@@ -430,4 +426,4 @@ async def teams(ctx: commands.Context) -> None:
     await ctx.send("Update successful.")
 
 
-bot.run(DISCORD_TOKEN)
+bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w"), log_level=logging.DEBUG)

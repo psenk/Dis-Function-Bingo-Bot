@@ -5,7 +5,7 @@ import discord
 import discord.ext
 import discord.ext.commands
 
-from utils import Constants
+from utils import Constants, Functions
 
 
 class LogTool(discord.ui.View):
@@ -22,6 +22,7 @@ class LogTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
+        self.logger = Functions.create_logger("tools")
         self.ctx = ctx
         self.logs_channel = logs_channel
         self.team = team
@@ -33,12 +34,6 @@ class LogTool(discord.ui.View):
     async def create_log_embed(self) -> None:
         """
         Creates and posts submission log embed.
-        param ctx: Discord context instance
-        param logs_channel: Discord TextChannel instance
-        param team: str - name of bingo team
-        param timestamp: datetime of submission
-        param uuid_no: UUID instance
-        param task_id: int - optional, id # of bingo task
         return: None
         """
 
@@ -54,3 +49,4 @@ class LogTool(discord.ui.View):
         log_embed.set_footer(text=self.uuid_no)
 
         self.message = await self.logs_channel.send(embed=log_embed, view=self)
+        self.logger.info("create_log_embed finished.")
