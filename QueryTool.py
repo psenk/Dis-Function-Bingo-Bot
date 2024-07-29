@@ -105,7 +105,7 @@ class QueryTool:
         param uuid_no: str - UUID of task
         return: None
         """
-        query = "DELETE FROM submissions WHERE uuid_no = $1;"
+        query = "DELETE FROM submissions WHERE uuid_no = '$1';"
         await self.execute(query, uuid_no)
         self.logger.info("Submission deleted.")
 
