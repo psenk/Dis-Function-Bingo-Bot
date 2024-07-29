@@ -48,6 +48,7 @@ class ApproveTool(discord.ui.View):
         submission = self.submissions[self.page]
         approve_tool = discord.Embed(title=f"Submission Approval Tool", color=0xFFFF00)
         msg = await self.get_message(submission["message_id"], submission["team"])
+        self.uuid_no = submission["uuid_no"]
         approve_tool.set_image(url=msg.attachments[0].url)
         approve_tool.add_field(name="Submission", value=f"[HERE]({submission['jump_url']})", inline=True)
         approve_tool.add_field(name="Player", value=f"{submission['player']}", inline=True)

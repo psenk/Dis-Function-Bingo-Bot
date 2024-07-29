@@ -51,6 +51,7 @@ class QueryTool:
                     await connection.execute(query, *args)
             self.logger.info("Query executed successfully.")
         except Exception as e:
+            self.logger.error(f"Query attempted -> {query}")
             self.logger.error(f"Error executing query -> {e}", exc_info=True)
             raise
 
@@ -105,7 +106,9 @@ class QueryTool:
         param uuid_no: str - UUID of task
         return: None
         """
-        query = "DELETE FROM submissions WHERE uuid_no = '$1';"
+        query = "DELETE FROM submissions WHERE uuid_no = $1;"
+        self.logger.info(f"Delete submission query -> {query}")
+        self.logger.info(f"UUID number -> {uuid_no}")
         await self.execute(query, uuid_no)
         self.logger.info("Submission deleted.")
 

@@ -38,7 +38,6 @@ bot_logger.setLevel(logging.DEBUG)
 # TODO: teams database?  expand!!
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
-# ! TODO: more robust error handling
 
 ### * ADMIN COMMANDS
 
