@@ -1,18 +1,17 @@
 import discord
 
-
-class ConfirmTool(discord.ui.View):
+class YesNoTool(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=60.0)
-        self.confirm = None
-        dropdown = ConfirmDropdown(self)
+        self.response = None
+        dropdown = YesNoDropdown(self)
         self.add_item(dropdown)
 
-    def add_confirm(self, confirm: str) -> None:
-        self.confirm = confirm
+    def add_response(self, response: str) -> None:
+        self.response = response
         self.stop()
 
-class ConfirmDropdown(discord.ui.Select):
+class YesNoDropdown(discord.ui.Select):
     
     def __init__(self, parent: discord.ui.View):
         self.parent = parent
@@ -21,8 +20,4 @@ class ConfirmDropdown(discord.ui.Select):
     
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
-        self.parent.add_confirm(self.values[0])
-        
-    async def on_timeout(self) -> None:
-        print("Selecting purple menu timed out.")
-        return await super().on_timeout()
+        self.parent.add_response(self.values[0])

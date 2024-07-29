@@ -58,7 +58,7 @@ class ApproveTool(discord.ui.View):
             approve_tool.add_field(name="", value="", inline=True)
         else:
             approve_tool.add_field(name="Bonus Task Purple", value=submission['purple'])
-        approve_tool.set_footer(text=submission['uuid'])
+        approve_tool.set_footer(text=submission['uuid_no'])
 
         return approve_tool
 

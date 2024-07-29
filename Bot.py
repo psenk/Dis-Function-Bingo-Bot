@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 import Util
 from ApproveTool import ApproveTool
-from ConfirmTool import ConfirmTool
+from YesNoTool import YesNoTool
 from LogTool import LogTool
 from QueryTool import QueryTool
 from SubmitTool import SubmitTool
@@ -115,9 +115,9 @@ async def approve(interaction: discord.Interaction) -> None:
     param interaction: Discord Interaction instance
     return: None
     """
-    
+    # is this admin channel?
     if interaction.channel_id != Util.TEST_ADMIN_CHANNEL_ID:
-        await interaction.response.send_message("This command can only be used in the admin channel.")
+        await interaction.response.send_message("This command can only be used in the admin channel.", ephemeral=True)
         return
     global bot
     await interaction.response.defer()
@@ -196,19 +196,19 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
     
     team = Util.get_user_team(interaction.user.roles)
     
-    # is user in bingo
+    # is user in bingo?
     if team is None:
-        await interaction.followup.send("You are not authorized to use this command!")
+        await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
         return
     
-    # is this users submission channel
+    # is this users submission channel?
     if interaction.channel_id != Util.TEST_SUBMISSION_CHANNELS.get(team):
-        await interaction.followup.send("This is not your teams submission channel!")
+        await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
         return
 
-    # is this a valid task number
+    # is this a valid task number?
     if not Util.check_task_id(task_id):
-        await interaction.followup.send("Invalid task id!")
+        await interaction.followup.send("Invalid task id!", ephemeral=True)
         return
     
     # is this task unlocked yet?
@@ -218,23 +218,23 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
         await interaction.followup.send("This task is not available yet!")
         return
 
+    # ! LOOP?  NO TO CANCEL?
     # get screenshots
-    await interaction.followup.send(file=File("docs/submit.jpg"))
+    await interaction.followup.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267221138677829843/submit.png?ex=66a7ff27&is=66a6ada7&hm=dd9edfe1a27b57cba67c7f4ae2283b15c88f5561ba9bbe02b4774fb89a629fc1&")
     message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
 
     if not message.attachments:
-        await interaction.followup.send("No attachments found.  Please attach submission screenshots.")
-    
+        await interaction.followup.send("No attachments found.  Please attach submission screenshots.", ephemeral=True)
+        return
+
     # ok cool
-    multi = len(message.attachments) > 1
     uuid_no = uuid.uuid1()
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
     
     logs_channel = bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID)
-    submit_tool = SubmitTool(interaction, logs_channel, task_id, team, multi, uuid_no)
+    ctx = await bot.get_context(message)
+    submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
     await submit_tool.create_submit_tool_embed()
-    
-    await interaction.channel.send("The bingo admin team has received your submission!", delete_after=10.0)
 
 # ! TURN CONFIRM SCREEN INTO NEAT IMBED INSTEAD OF MESSY STRING
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
@@ -257,31 +257,31 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
     """
     await interaction.response.defer()
     
-    # is user in bingo
+    # is user in bingo?
     if Util.get_user_team(interaction.user.roles) == None:
-        await interaction.followup.send("You are not authorized to use this command!")
+        await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
         return
     
-    # is player in bingo
+    # is player in bingo?
     if Util.get_user_team(player.roles) == None:
-        await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n*Hint: press Up Arrow to try again.*")
+        await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n*Hint: press Up Arrow to try again.*", ephemeral=True)
         return
     
     team = Util.get_user_team(player.roles)
     
-    # is this users submission channel
+    # is this users submission channel?
     if interaction.channel_id != Util.TEST_SUBMISSION_CHANNELS.get(team):
-        await interaction.followup.send("This is not your teams submission channel!")
+        await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
         return
-    
-    # ok cool    
+       
     # validate date/time format
     if not await Util.validate_data(interaction, date=date, time=time):
-        await interaction.followup.send("Submission error!\n*Hint: press Up Arrow to try again.*")
+        await interaction.followup.send("Date/Time error!", ephemeral=True)
         return
     
+    # ok cool 
     # confirm submission details
-    confirm_view = ConfirmTool()
+    confirm_view = YesNoTool()
     image = await interaction.channel.send(submission.url)
     confirm_content = f"Player **{player.display_name}** obtained **{purple.name}** for **{team}** on **{date}** at **{time}**.\n_ _\nDoes this all look correct?\n_ _"
     confirm_message = await interaction.channel.send(confirm_content, view=confirm_view)

@@ -44,11 +44,11 @@ class QueryTool:
         return: None
         """
         d = datetime.now()
-        query = "INSERT INTO submissions (task_id, player, team, uuid, jump_url, message_id, date_submitted, purple) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
+        query = "INSERT INTO submissions (task_id, player, team, uuid_no, jump_url, message_id, date_submitted, purple) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);"
 
         async with self.pool.acquire() as connection:
             async with connection.transaction():
-                await connection.execute(query, task_id, player, team, str(uuid_no), jump_url, message_id, d, purple)
+                await connection.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
         print("Task submitted, connection closed.")
 
     async def delete_submission(self, uuid: str) -> None:

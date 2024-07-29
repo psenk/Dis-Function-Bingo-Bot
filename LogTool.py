@@ -9,7 +9,7 @@ import Util
 
 
 class LogTool(discord.ui.View):
-    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, multi: bool, team: str, timestamp: datetime.datetime, uuid_no: uuid.UUID, task_id: int = None):
+    def __init__(self, ctx: discord.ext.commands.Context, logs_channel: discord.TextChannel, team: str, timestamp: datetime.datetime, uuid_no: uuid.UUID, task_id: int = None) -> None:
         """
         LogTool Constructor
         param ctx: Discord Context instance
@@ -24,7 +24,6 @@ class LogTool(discord.ui.View):
         super().__init__(timeout=None)
         self.ctx = ctx
         self.logs_channel = logs_channel
-        self.multi = multi
         self.team = team
         self.task_id = task_id
         self.timestamp = timestamp
@@ -33,24 +32,23 @@ class LogTool(discord.ui.View):
 
     async def create_log_embed(self) -> None:
         """
-        param: Discord context object
-        param: Discord TextChannel object
-        param boolean: multiple submissions
-        param string: name of bingo team
-        param int: id # of bingo task
-        param datetime: timestamp of submission
-        param: UUID object
-        description: posts log embed to logs channel
+        Creates and posts submission log embed.
+        param ctx: Discord context instance
+        param logs_channel: Discord TextChannel instance
+        param team: str - name of bingo team
+        param timestamp: datetime of submission
+        param uuid_no: UUID instance
+        param task_id: int - optional, id # of bingo task
         return: None
         """
         
-        log_embed = discord.Embed(title=f"Submission Received{' (multiple images)' if self.multi else ''}", color=0x0000FF)
-        log_embed.set_author(name=f"Submission", url=self.ctx.message.jump_url)
+        log_embed = discord.Embed(title=f"Submission Received", color=0xFFFF00)
+        log_embed.set_author(name=f"Link to Submission", url=self.ctx.message.jump_url)
 
         log_embed.add_field(name="Team", value=self.team, inline=True)
         log_embed.add_field(name="Player", value=self.ctx.author.display_name, inline=True)
         log_embed.add_field(name="", value="", inline=True)
-        log_embed.add_field(name="Task", value=f"{'Bonus' if self.multi else Util.TASK_NUMBER_DICT.get(self.task_id)}")
+        log_embed.add_field(name="Task", value=f"{'Bonus' if self.task_id else Util.TASK_NUMBER_DICT.get(self.task_id)}")
         log_embed.add_field(name="Submitted on", value=self.timestamp, inline=True)
         log_embed.add_field(name="", value="", inline=True)
         log_embed.set_footer(text=self.uuid_no)
