@@ -1,11 +1,10 @@
 import discord
-import Constants
 
 DATE_FORMAT = "%m-%d-%y"
 TIME_FORMAT = "%H:%M"
 
-Constants.GUILD_ID = 969399636995493899 # * Sith Replacement: 741153043776667658
-GUILD = discord.Object(Constants.GUILD_ID)  # ! SWAP DURING LIVE BINGO
+GUILD_ID = 969399636995493899 # * Sith Replacement: 741153043776667658
+GUILD = discord.Object(GUILD_ID)  # ! SWAP DURING LIVE BINGO
 
 BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! Sith Replacement: 
 
