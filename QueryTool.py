@@ -13,6 +13,7 @@ CONNECTION_STRING = os.getenv("PG_CONNECTION_STRING")
 logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(filename="logs/query_tool.log", encoding="utf-8", mode="w")])
 logger = logging.getLogger(__name__)
 
+
 class QueryTool:
     def __init__(self):
         self.pool = None
@@ -49,7 +50,7 @@ class QueryTool:
         except Exception as e:
             logger.error(f"Error executing query: {e}")
             raise
-            
+
     async def fetch(self, query: str, *args) -> list:
         """
         Executes a query and returns multiple rows.
@@ -63,7 +64,7 @@ class QueryTool:
         except Exception as e:
             logger.error(f"Error fetching data: {e}")
             raise
-            
+
     async def fetchval(self, query: str, *args) -> any:
         """
         Executes a query and returns a single value.
