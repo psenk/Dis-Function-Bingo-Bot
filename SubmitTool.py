@@ -59,8 +59,8 @@ class SubmitTool(discord.ui.View):
         d = datetime.now()
         await interaction.followup.send(f"Submission for Bingo Task {self.task_id}: **{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}** was sent by {interaction.user.display_name} on {d.strftime('%Y-%m-%d at %H:%M:%S')}.")
 
-        async with QueryTool() as query_tool:
-            await query_tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), task_id=self.task_id)
+        async with QueryTool() as tool:
+            await tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), task_id=self.task_id)
         log_tool = LogTool(self.ctx, self.logs_channel, self.team, d, self.uuid_no, task_id=self.task_id)
         await log_tool.create_log_embed()
         # await interaction.response.edit_message(view=None)
