@@ -12,18 +12,17 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+
 from tools import ApproveTool as ApproveTool
 from tools import LogTool as LogTool
-from tools import QueryTool as QueryTool 
+from tools import QueryTool as QueryTool
 from tools import SubmitTool as SubmitTool
+from tools import YesNoTool as YesNoTool
+from unused.test.TeamOptionsTool import TeamOptionsTool
+from unused.test.TeamsTool import TeamsTool
 from utils import Choices, Constants, Functions
-from YesNoTool import YesNoTool
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-GOOGLE_SHEETS_KEY = os.getenv("GOOGLE_SHEETS_KEY")
-DB_LOCALHOST = os.getenv("MYSQL_LOCALHOST")
-DB_USER_NAME = os.getenv("MYSQL_USER_NAME")
-DB_PW = os.getenv("MYSQL_PW")
 
 intents = discord.Intents.all()
 intents.message_content = True
@@ -36,7 +35,6 @@ bot_logger.setLevel(logging.DEBUG)
 # TODO: teams database?  expand!!
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
-# ! TODO: validation.py
 # ! TODO: improve embed designs?
 # ! TODO: finish task_submit for review
 
