@@ -308,6 +308,7 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
         await interaction.followup.send("Bonus submission canceled.", ephemeral=True)
         return
 
+    await confirm_message.delete()
     uuid_bonus = uuid.uuid1()
     date = datetime.strptime(date, Util.DATE_FORMAT).date()
     time = datetime.strptime(time, Util.TIME_FORMAT).time()
