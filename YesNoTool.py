@@ -1,8 +1,11 @@
 import discord
 
+from utils import Functions
+
 class YesNoTool(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=60.0)
+        self.logger = Functions.create_logger("tools")
         self.response = None
         dropdown = YesNoDropdown(self)
         self.add_item(dropdown)
@@ -10,6 +13,7 @@ class YesNoTool(discord.ui.View):
     def add_response(self, response: str) -> None:
         self.response = response
         self.stop()
+        self.logger.info("Response added.")
 
 class YesNoDropdown(discord.ui.Select):
     
@@ -21,3 +25,4 @@ class YesNoDropdown(discord.ui.Select):
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer()
         self.parent.add_response(self.values[0])
+        self.parent.logger.info(f"Response selected: {self.values[0]}")
