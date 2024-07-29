@@ -78,3 +78,4 @@ def create_logger(filename: str) -> logging.Logger:
     handler.setLevel(logging.DEBUG)
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
+    return logger
