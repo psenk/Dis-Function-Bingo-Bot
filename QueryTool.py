@@ -98,10 +98,10 @@ class QueryTool:
     async def delete_submission(self, uuid_no: str) -> None:
         """
         Deletes submission from database.
-        param uuid: str - UUID of task
+        param uuid_no: str - UUID of task
         return: None
         """
-        query = "DELETE FROM submissions WHERE uuid = $1;"
+        query = "DELETE FROM submissions WHERE uuid_no = $1;"
         await self.execute(query, uuid_no)
         logger.info("Submission deleted.")
 
