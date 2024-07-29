@@ -127,7 +127,7 @@ class ApproveTool(discord.ui.View):
         Button event.  Reacts to submission with emoji, sends message to team submission channel.  Refreshes self.
         param task_id: int - bingo task number
         param submission: list - submission receiving reaction
-        param bonus: bool - is it a bonus submission?  default to False # ! TODO: UPDATE THIS AFTER BONUS COMMAND WORK DONE
+        param bonus: bool - is it a bonus submission?  default to False
         param approve: bool - approve submission?  default to False (reject)
         return: None
         """
