@@ -179,6 +179,7 @@ async def ranch(interaction: discord.Interaction) -> None:
     """
     await interaction.response.send_message("https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&")
 
+
 # ! As days/dropdowns?  e.g Day 4 - Task 7
 @bot.tree.command(description="Submit a bingo task for approval.")
 @app_commands.describe(task_id="Bingo task number")
@@ -220,9 +221,10 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
 
     # ! LOOP?  NO TO CANCEL?
     # get screenshots
-    await interaction.followup.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267221138677829843/submit.png?ex=66a7ff27&is=66a6ada7&hm=dd9edfe1a27b57cba67c7f4ae2283b15c88f5561ba9bbe02b4774fb89a629fc1&")
+    await interaction.followup.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267221138677829843/submit.png?ex=66a7ff27&is=66a6ada7&hm=dd9edfe1a27b57cba67c7f4ae2283b15c88f5561ba9bbe02b4774fb89a629fc1&", ephemeral=True)
     message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
 
+    # are there screenshots?
     if not message.attachments:
         await interaction.followup.send("No attachments found.  Please attach submission screenshots.", ephemeral=True)
         return
@@ -236,7 +238,7 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
     submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
     await submit_tool.create_submit_tool_embed()
 
-# ! TURN CONFIRM SCREEN INTO NEAT IMBED INSTEAD OF MESSY STRING
+
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
 @app_commands.describe(purple="Name of item received", 
                        date="Date of bonus submission on screenshot, format MM-DD-YY", 
@@ -244,7 +246,7 @@ async def submit(interaction: discord.Interaction, task_id: int) -> None:
                        player="Name of player that received the purple")
 @app_commands.choices(purple=Util.COX_PURPLES)
 @app_commands.guilds(TEST_GUILD)
-async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member, submission: discord.Attachment) -> None:
+async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member) -> None:
     """
     Submits a bonus task to bingo admins for approval.
     param interaction: Discord Interaction instance
@@ -279,31 +281,46 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
         await interaction.followup.send("Date/Time error!", ephemeral=True)
         return
     
+    # get screenshots
+    await interaction.followup.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267221138677829843/submit.png?ex=66a7ff27&is=66a6ada7&hm=dd9edfe1a27b57cba67c7f4ae2283b15c88f5561ba9bbe02b4774fb89a629fc1&", ephemeral=True)
+    message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=30.0)
+    
+    # are there screenshots?
+    if not message.attachments:
+        await interaction.followup.send("No attachments found.  Please attach submission screenshots.", ephemeral=True)
+        return
+    
     # ok cool 
     # confirm submission details
-    confirm_view = YesNoTool()
-    image = await interaction.channel.send(submission.url)
-    confirm_content = f"Player **{player.display_name}** obtained **{purple.name}** for **{team}** on **{date}** at **{time}**.\n_ _\nDoes this all look correct?\n_ _"
-    confirm_message = await interaction.channel.send(confirm_content, view=confirm_view)
-    await confirm_view.wait()
+    confirm_embed = discord.Embed(title="Submission Confirmation", color=0xFFFF00)
+    confirm_embed.add_field(name="Team", value=team, inline=True)
+    confirm_embed.add_field(name="Player", value=player.display_name, inline=True)
+    confirm_embed.add_field(name="", value="", inline=True)
+    confirm_embed.add_field(name="Purple", value=purple.name, inline=True)
+    confirm_embed.add_field(name="Submitted on", value=f"{date + ' at ' + time}", inline=True)
+
+    yesno_view = YesNoTool()
+    confirm_message = await interaction.channel.send(content="Does all of this information look correct?\n_ _", embed=confirm_embed, view=yesno_view, delete_after=30.0)
+    await yesno_view.wait()
 
     # handle confirmation response
-    if confirm_view.confirm is None or confirm_view.confirm.lower() == "no":
-        await interaction.followup.send("Bonus submission canceled.")
+    if yesno_view.response is None or yesno_view.response == "No":
+        await interaction.followup.send("Bonus submission canceled.", ephemeral=True)
         return
 
     uuid_bonus = uuid.uuid1()
     date = datetime.strptime(date, Util.DATE_FORMAT).date()
     time = datetime.strptime(time, Util.TIME_FORMAT).time()
     date_bonus = datetime.combine(date, time)
-    await confirm_message.delete()
+
     async with QueryTool() as tool:
-        await tool.submit_task(player.display_name, team, uuid_bonus, image.jump_url, str(image.id), purple.name)
+
+        await tool.submit_task(player.display_name, team, uuid_bonus, message.jump_url, str(message.id), purple=purple.name)
         ctx = await bot.get_context(confirm_message)
-        log_tool = LogTool(ctx, bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID), False, team, date_bonus, uuid_bonus)
+        log_tool = LogTool(ctx, bot.get_channel(Util.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
         await log_tool.create_log_embed()
     
-    await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.")
+    await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
 
 
 @bot.event

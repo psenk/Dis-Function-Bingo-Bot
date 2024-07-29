@@ -42,8 +42,8 @@ class LogTool(discord.ui.View):
         return: None
         """
         
-        log_embed = discord.Embed(title=f"Submission Received", color=0xFFFF00)
-        log_embed.set_author(name=f"Link to Submission", url=self.ctx.message.jump_url)
+        log_embed = discord.Embed(title="Submission Received", color=0xFFFF00)
+        log_embed.set_author(name="Link to Submission", url=self.ctx.message.jump_url)
 
         log_embed.add_field(name="Team", value=self.team, inline=True)
         log_embed.add_field(name="Player", value=self.ctx.author.display_name, inline=True)

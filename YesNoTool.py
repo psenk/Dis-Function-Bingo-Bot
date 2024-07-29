@@ -15,7 +15,7 @@ class YesNoDropdown(discord.ui.Select):
     
     def __init__(self, parent: discord.ui.View):
         self.parent = parent
-        options = [discord.SelectOption(label="Yes", value="Yes"), discord.SelectOption(label="No", value="No")]
+        options = [discord.SelectOption(label="Yes", value="Yes", emoji="👍"), discord.SelectOption(label="No", value="No", emoji="👎")]
         super().__init__(placeholder="Select", options=options, min_values=1, max_values=1)
     
     async def callback(self, interaction: discord.Interaction) -> None:
