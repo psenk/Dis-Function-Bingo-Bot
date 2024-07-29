@@ -95,7 +95,7 @@ class QueryTool:
         await self.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
         logger.info("Task submitted.")
 
-    async def delete_submission(self, uuid_no: str) -> None:
+    async def delete_submission(self, uuid_no: uuid.UUID) -> None:
         """
         Deletes submission from database.
         param uuid_no: str - UUID of task
