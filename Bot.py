@@ -13,11 +13,11 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-from tools import ApproveTool as ApproveTool
-from tools import LogTool as LogTool
-from tools import QueryTool as QueryTool
-from tools import SubmitTool as SubmitTool
-from tools import YesNoTool as YesNoTool
+from tools.ApproveTool import ApproveTool
+from tools.LogTool import LogTool
+from tools.QueryTool import QueryTool
+from tools.SubmitTool import SubmitTool
+from tools.YesNoTool import YesNoTool
 from unused.test.TeamOptionsTool import TeamOptionsTool
 from unused.test.TeamsTool import TeamsTool
 from utils import Choices, Constants, Functions
@@ -349,7 +349,38 @@ async def on_ready() -> None:
 @app_commands.describe(day="What board is the task on?", task="Which task are you trying to complete?")
 @app_commands.guilds(Constants.GUILD)
 async def test_submit(interaction: discord.Interaction, day: int, task: int) -> None:
-    await interaction.response.send_message(f"Selected day: {day}, task: {task}")
+    await interaction.response.defer()
+    await interaction.channel.send(f"Selected day: {day}, task: {task}")
+
+    team = Functions.get_user_team(interaction.user.roles)
+
+    # is user in bingo?
+    if team is None:
+        await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
+        return
+
+    # is this users submission channel?
+    if interaction.channel_id != Constants.TEST_SUBMISSION_CHANNELS.get(team):
+        await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
+        return
+
+    # get screenshots
+    await interaction.channel.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&", delete_after=20.0)
+    message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
+
+    # are there screenshots?
+    if not message.attachments:
+        await interaction.followup.send("No attachments found. Please attach submission screenshots.", ephemeral=True)
+        return
+
+    # ok cool
+    uuid_no = uuid.uuid1()
+    # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
+
+    logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
+    ctx = await bot.get_context(message)
+    submit_tool = SubmitTool(ctx, message.attachments, logs_channel, (day * task), team, uuid_no)
+    await submit_tool.create_submit_tool_embed()
     bot_logger.info(f"/test_submit command used by {interaction.user.display_name}")
 
 
@@ -394,7 +425,7 @@ async def teams(ctx: commands.Context) -> None:
         info = await tool.get_team(team)
         info = info[0]
     await ctx.send(f"_ _\nInformation for **{info['team_name']}:**\n**Captain**: {info['captain']}\n**Role ID**: {info['role_id']}\n**Submission Channel ID**: {info['channel_id']}")
-    team_options_tool = TeamOptionsTool(team)
+    team_options_tool = TeamOptionsTool.TeamOptionsTool(team)
     await ctx.send(f"_ _\nWhat would you like to do with {team}?\n_ _", view=team_options_tool)
     await team_options_tool.wait()
     option = team_options_tool.option

@@ -1,9 +1,9 @@
-import logging
 import discord
 import discord.ext.commands
-from utils import Constants, Functions
+
 from tools.QueryTool import QueryTool
 from tools.SheetsTool import SheetsTool
+from utils import Constants, Functions
 
 
 class ApproveTool(discord.ui.View):
@@ -15,7 +15,7 @@ class ApproveTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
-        self.logger = Functions.create_logger("tools")        
+        self.logger = Functions.create_logger("tools")
         self.submissions = []
         self.interaction = interaction
         self.message = None
@@ -23,7 +23,6 @@ class ApproveTool(discord.ui.View):
         self.page = 0
         self.purple = None
         self.uuid_no = None
-        
 
     async def create_approve_embed(self) -> None:
         """
@@ -63,7 +62,7 @@ class ApproveTool(discord.ui.View):
         else:
             approve_tool.add_field(name="Bonus Task Purple", value=submission["purple"])
         approve_tool.set_footer(text=submission["uuid_no"])
-        
+
         self.logger.info("populate_embed finished.")
         return approve_tool
 
