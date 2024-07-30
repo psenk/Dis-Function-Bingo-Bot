@@ -24,7 +24,6 @@ from unused.test.TeamsTool import TeamsTool
 from utils import Choices, Constants, Functions
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-
 intents = discord.Intents.all()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -57,7 +56,7 @@ async def helpadmin(interaction: discord.Interaction) -> None:
     help_embed.add_field(name="", value="", inline=True)
     help_embed.add_field(name="/task", value="Display bingo task information.", inline=True)
     await interaction.response.send_message(embed=help_embed)
-    bot_logger.info(f"/helpadmin used by: {interaction.user.display_name}")
+    bot_logger.info(f"/helpadmin used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -75,7 +74,7 @@ async def task(interaction: discord.Interaction, task_id: int) -> None:
     return: None
     """
     await interaction.response.send_message(f"Task # {task_id}: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}", ephemeral=True)
-    bot_logger.info(f"/task used by: {interaction.user.display_name}")
+    bot_logger.info(f"/task used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -91,7 +90,7 @@ async def kill(interaction: discord.Interaction) -> None:
     return: None
     """
     await interaction.response.send_message("Later nerds.")
-    bot_logger.info(f"/kill used by: {interaction.user.display_name}")
+    bot_logger.info(f"/kill used by -> {interaction.user.display_name}")
     await bot.close()
 
 
@@ -113,7 +112,7 @@ async def day(interaction: discord.Interaction, day: int) -> None:
     async with QueryTool() as tool:
         day = await tool.update_day(day)
     await interaction.followup.send(f"Day of bingo updated to: {day}")
-    bot_logger.info(f"/day used by: {interaction.user.display_name}")
+    bot_logger.info(f"/day used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -132,11 +131,10 @@ async def approve(interaction: discord.Interaction) -> None:
     if interaction.channel_id != Constants.TEST_ADMIN_CHANNEL_ID:
         await interaction.response.send_message("This command can only be used in the admin channel.", ephemeral=True)
         return
-    global bot
     await interaction.response.defer()
     approve_tool = ApproveTool(interaction, bot)
     await approve_tool.create_approve_embed()
-    bot_logger.info(f"/approve used by: {interaction.user.display_name}")
+    bot_logger.info(f"/approve used by -> {interaction.user.display_name}")
 
 
 # * # * # USER COMMANDS # * # * #
@@ -161,7 +159,7 @@ async def help(interaction: discord.Interaction) -> None:
     help_embed.add_field(name="/ranch", value="Ram Ranch really rocks!", inline=True)
 
     await interaction.response.send_message(embed=help_embed)
-    bot_logger.info(f"/help used by: {interaction.user.display_name}")
+    bot_logger.info(f"/help used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -186,7 +184,7 @@ async def butt(interaction: discord.Interaction) -> None:
         else:
             word += i
     await interaction.response.send_message(word + "~,.")
-    bot_logger.info(f"/butt used by: {interaction.user.display_name}")
+    bot_logger.info(f"/butt used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -201,7 +199,7 @@ async def ranch(interaction: discord.Interaction) -> None:
     return: None
     """
     await interaction.response.send_message("https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&")
-    bot_logger.info(f"/ranch used by: {interaction.user.display_name}")
+    bot_logger.info(f"/ranch used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -219,61 +217,84 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     return: None
     """
     await interaction.response.defer()
-    await interaction.channel.send(f"Selected Task: {Constants.TASK_DESCRIPTION_MAP.get(task * 9)}")
+    task_id = (day * 9) + (task - 9)
+    bot_logger.info(f"/submit task_id -> {task_id}")
 
+    await interaction.channel.send(f"Selected Task: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}")
+    bot_logger.info(f"/submit task -> {Constants.TASK_DESCRIPTION_MAP.get(task_id)}")
     team = Functions.get_user_team(interaction.user.roles)
+    bot_logger.info(f"/submit team -> {team}")
 
     # is user in bingo?
-    if team is None:
+    if not team:
         await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
+        bot_logger.info("/submit failed -> user not in bingo")
         return
 
     # is this users submission channel?
     if interaction.channel_id != Constants.TEST_SUBMISSION_CHANNELS.get(team):
         await interaction.followup.send("This is not your teams submission channel!", ephemeral=True)
+        bot_logger.info("/submit failed -> submission not in correct channel")
         return
 
     # get screenshots
     await interaction.channel.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&", delete_after=20.0)
     message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
+    bot_logger.info(f"/submit attachments message -> {message}")
 
     # are there screenshots?
     if not message.attachments:
         await interaction.followup.send("No attachments found. Please attach submission screenshots.", ephemeral=True)
+        bot_logger.info(f"/submit failed -> no attachments sent")
         return
 
     # ok cool
     uuid_no = uuid.uuid1()
+    bot_logger.info(f"/submit uuid -> {uuid_no}")
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
-
     logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
     ctx = await bot.get_context(message)
-    submit_tool = SubmitTool(ctx, message.attachments, logs_channel, (day * task), team, uuid_no)
+    submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
     await submit_tool.create_submit_tool_embed()
-    bot_logger.info(f"/submit command used by {interaction.user.display_name}")
+    bot_logger.info(f"/submit command used by -> {interaction.user.display_name}")
 
 
 @submit.autocomplete("day")
-async def auto_complete_day(interaction: discord.Interaction, current: str) -> List[Choice[int]]:
+async def auto_complete_day(interaction: discord.Interaction, current: str) -> List[Choice]:
     async with QueryTool() as tool:
         day = await tool.get_day()
+    bot_logger.info(f"\nDay from database -> {day}")
     choices = [choice for choice in Choices.DAY_AND_BOARD if choice.value <= day]
+    bot_logger.info(f"Auto-complete days options -> {choices}")
     return choices
 
 
 @submit.autocomplete("task")
-async def auto_complete_task(interaction: discord.Interaction, current: str) -> List[Choice[int]]:
-    day = interaction.data.get("options", [])[0].get("value")
-    if day and day in Choices.DAY_TASKS:
-        return [choice for choice in Choices.DAY_TASKS[day]]
+async def auto_complete_task(interaction: discord.Interaction, current: str) -> List[Choice]:
+    opts = interaction.data.get("options")
+    bot_logger.info(f"Task options -> {opts}")
+    bot_logger.info(f"Interaction data -> {interaction.data}")
+
+    if opts:
+        day_option = opts[0]
+        bot_logger.info(f"Day option -> {day_option}")
+        if day_option:
+            day = day_option.get("value")
+            bot_logger.info(f"Day -> {day}, Day data type -> {type(day)}")
+            if day in Choices.DAY_TASKS:
+                choices = [task for task in Choices.DAY_TASKS[day]]
+                bot_logger.info(f"Task choices -> {choices}")
+                return choices
     return []
 
 
 # ? # ? # ? # ? #
 
+# ! use submittool dummy
+
 
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
-@app_commands.describe(purple="Which item was obtained?", date="Date from clan event plugin, format MM-DD-YY", time="Time from clan event plugin, format HH:MM (24-hr)", player="Which player got the item?")
+@app_commands.describe(purple="Which item was obtained?", date="Date from clan event plugin, format MM-DD-YY", time="Time from clan event plugin, format HH:MM (24-hr UTC)", player="Which player got the item?")
 @app_commands.choices(purple=Choices.COX_PURPLES)
 @app_commands.guilds(Constants.GUILD)
 async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member) -> None:
@@ -290,12 +311,12 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
     await interaction.response.defer()
 
     # is user in bingo?
-    if Functions.get_user_team(interaction.user.roles) == None:
+    if not Functions.get_user_team(interaction.user.roles):
         await interaction.followup.send("You are not authorized to use this command!", ephemeral=True)
         return
 
     # is player in bingo?
-    if Functions.get_user_team(player.roles) == None:
+    if not Functions.get_user_team(player.roles):
         await interaction.followup.send("Invalid player, they are either not in the bingo or are missing a team role.\n", ephemeral=True)
         return
 
@@ -346,12 +367,13 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     async with QueryTool() as tool:
         await tool.submit_task(player.display_name, team, uuid_bonus, message.jump_url, str(message.id), purple=purple.name)
-        ctx = await bot.get_context(confirm_message)
-        log_tool = LogTool(ctx, bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
-        await log_tool.create_log_embed()
+
+    ctx = await bot.get_context(confirm_message)
+    log_tool = LogTool(ctx, bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
+    await log_tool.create_log_embed()
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
-    bot_logger.info(f"/bonus used by: {interaction.user.display_name}")
+    bot_logger.info(f"/bonus used by -> {interaction.user.display_name}")
 
 
 # ? # ? # ? # ? #
@@ -362,7 +384,7 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 async def test_game(interaction: discord.Interaction) -> None:
     await interaction.response.defer()
 
-    p = Game.Player(x=7, y=5)
+    p = Game.Player(x=7, y=10)
     game = Game(interaction, p)
     game.set_map(Game.game_map)
     await game.start()
@@ -377,11 +399,15 @@ async def on_ready() -> None:
     This code runs every time the bot boots up,
     return: None
     """
+
     await bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID).send("Foki Bot online!")
     print("Bingo Bot online.")
     bot_logger.info("Foki Bot online.")
-    await bot.tree.sync(guild=Constants.GUILD)
-    bot_logger.info("Command tree synced.")
+    try:
+        await bot.tree.sync(guild=Constants.GUILD)
+        bot_logger.info("Command tree synced.")
+    except Exception as e:
+        bot_logger.error(f"Error syncing command tree -> {e}")
 
 
 bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(filename="logs/discord.log", encoding="utf-8", mode="w"), log_level=logging.DEBUG)
@@ -396,7 +422,7 @@ async def teams(ctx: commands.Context) -> None:
     param: Discord Context object
     return: None
     """
-    print(f"Teams command used by: {ctx.author}")
+    print(f"Teams command used by -> {ctx.author}")
     if not Functions.is_admin(ctx):
         await ctx.send("You are not authorized to use this command!")
         return

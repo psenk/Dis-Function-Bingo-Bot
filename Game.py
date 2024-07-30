@@ -2,26 +2,27 @@ import discord
 
 
 class Game(discord.ui.View):
-    
-    game_map = [["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="],
-                ["=", "=", "=", "=", "=", "=", "=", "=", "=", "="]]
-    
+    game_map = [
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"],
+    ]
+
     class Player:
         def __init__(self, x, y):
             self.x = x
             self.y = y
-            self.icon = 'o'
+            self.icon = "X"
 
         def up(self):
             self.x = max(0, self.x - 1)
@@ -44,7 +45,7 @@ class Game(discord.ui.View):
 
     async def start(self):
         self.instance = await self.interaction.channel.send(self.draw_map(), view=self)
-        
+
     async def update(self):
         if self.instance:
             await self.instance.edit(content=self.draw_map(), view=self)
@@ -54,7 +55,7 @@ class Game(discord.ui.View):
 
     def set_player(self, p):
         self.player = p
-        
+
     def get_player_loc(self):
         return [self.player.x, self.player.y]
 
@@ -62,7 +63,7 @@ class Game(discord.ui.View):
         map_copy = [row[:] for row in self.game_map]
         p = self.get_player_loc()
         map_copy[p[0]][p[1]] = self.player.icon
-        
+
         map_str = ""
         for row in map_copy:
             for col in row:
@@ -70,25 +71,25 @@ class Game(discord.ui.View):
             map_str += "\n"
         return map_str
 
-    @discord.ui.button(label="˂", custom_id="left")
+    @discord.ui.button(custom_id="left", emoji="⏪")
     async def left_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         self.player.lt()
         await self.update()
 
-    @discord.ui.button(label="˄", custom_id="up")
+    @discord.ui.button(custom_id="up", emoji="⏫")
     async def up_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         self.player.up()
         await self.update()
 
-    @discord.ui.button(label="˅", custom_id="down")
+    @discord.ui.button(custom_id="down", emoji="⏬")
     async def down_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         self.player.dn()
         await self.update()
-        
-    @discord.ui.button(label="˃", custom_id="right")
+
+    @discord.ui.button(custom_id="right", emoji="⏩")
     async def right_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         self.player.rt()
