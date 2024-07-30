@@ -72,7 +72,7 @@ DAY_TASKS = {
     ],
     5: [
         discord.app_commands.Choice(name="Get any 3 different Wintertodt uniques", value=1),
-        discord.app_commands.Choice(name="Max out your Monkey Backpack (1 Player must do 2000 new laps of Ape Atoll Agility and get the Princely Monkey)", value=2),
+        discord.app_commands.Choice(name="Max out a Monkey Backpack (1 Player must do 2000 laps of Ape Atoll Agility and get Princely Monkey)", value=2),
         discord.app_commands.Choice(name="Open 10 of each tier of Clue Casket (Must obtain and complete the clue during bingo)", value=3),
         discord.app_commands.Choice(name="Obtain a Zalcano Shard", value=4),
         discord.app_commands.Choice(name="Get 13,034,431 Runecrafting XP as a team", value=5),
@@ -93,7 +93,7 @@ DAY_TASKS = {
         discord.app_commands.Choice(name="Complete A Voidwaker from scratch", value=9),
     ],
     7: [
-        discord.app_commands.Choice(name="Complete a Hard Mode In the Grandmaster Time Limit - 3 Scale - 23 Min - 4 Scale - 21 Min - 5 Scale - 19 Min", value=1),
+        discord.app_commands.Choice(name="Complete a Hard Mode within Grandmaster Time: 3 Scale - 23 Min, 4 Scale - 21 Min, 5 Scale - 19 Min", value=1),
         discord.app_commands.Choice(name="Get a purple", value=2),
         discord.app_commands.Choice(name='Complete the "Back in my Day" Combat Task', value=3),
         discord.app_commands.Choice(name="Bring a learner through a first clear Hard Mode", value=4),

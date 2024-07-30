@@ -86,7 +86,6 @@ TASK_DESCRIPTION_MAP = {
     61: 'Complete the "Personal Space" Combat Achievement',
     62: "Obtain a Holy Ornament Kit and a Sanguine Ornament Kit",
     63: "Get Lil' Zik",
-    998: "Bonus Task",
     999: "Test Task",
 }
 
