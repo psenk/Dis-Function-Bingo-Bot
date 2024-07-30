@@ -36,7 +36,6 @@ bot_logger.setLevel(logging.DEBUG)
 # ! TODO: reject task message?
 # ! TODO: approve/reject logs!!
 # ! TODO: improve embed designs?
-# ! TODO: finish task_submit for review
 
 # * # * # ADMIN COMMANDS # * # * #
 

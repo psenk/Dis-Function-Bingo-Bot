@@ -63,7 +63,6 @@ class SubmitTool(discord.ui.View):
             await tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.ctx.message.jump_url, str(self.ctx.message.id), task_id=self.task_id)
         log_tool = LogTool(self.ctx, self.logs_channel, self.team, d, self.uuid_no, task_id=self.task_id)
         await log_tool.create_log_embed()
-        # await interaction.response.edit_message(view=None)
         await self.message.delete()
         self.logger.info("submit_button finished.")
 
