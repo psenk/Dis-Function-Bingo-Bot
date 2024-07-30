@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+from Game import Game
 from tools.ApproveTool import ApproveTool
 from tools.LogTool import LogTool
 from tools.QueryTool import QueryTool
@@ -249,7 +250,7 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     ctx = await bot.get_context(message)
     submit_tool = SubmitTool(ctx, message.attachments, logs_channel, (day * task), team, uuid_no)
     await submit_tool.create_submit_tool_embed()
-    bot_logger.info(f"/test_submit command used by {interaction.user.display_name}")
+    bot_logger.info(f"/submit command used by {interaction.user.display_name}")
 
 
 @submit.autocomplete("day")
@@ -272,7 +273,7 @@ async def auto_complete_task(interaction: discord.Interaction, current: str) -> 
 
 
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
-@app_commands.describe(purple="Name of item received", date="Date of bonus submission on screenshot, format MM-DD-YY", time="Time of bonus submission on screenshot, format HH:MM (24-hr)", player="Name of player that received the purple")
+@app_commands.describe(purple="Which item was obtained?", date="Date from clan event plugin, format MM-DD-YY", time="Time from clan event plugin, format HH:MM (24-hr)", player="Which player got the item?")
 @app_commands.choices(purple=Choices.COX_PURPLES)
 @app_commands.guilds(Constants.GUILD)
 async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str, time: str, player: discord.Member) -> None:
@@ -351,6 +352,20 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
     bot_logger.info(f"/bonus used by: {interaction.user.display_name}")
+
+
+# ? # ? # ? # ? #
+
+
+@bot.tree.command(description="TEST")
+@app_commands.guilds(Constants.GUILD)
+async def test_game(interaction: discord.Interaction) -> None:
+    await interaction.response.defer()
+
+    p = Game.Player(x=7, y=5)
+    game = Game(interaction, p)
+    game.set_map(Game.game_map)
+    await game.start()
 
 
 # ? # ? # ? # ? #
