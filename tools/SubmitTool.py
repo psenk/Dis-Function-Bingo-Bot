@@ -5,9 +5,9 @@ import discord
 import discord.ext
 import discord.ext.commands
 
-from LogTool import LogTool
-from QueryTool import QueryTool
-from ..utils import Constants, Functions
+from tools.LogTool import LogTool
+from tools.QueryTool import QueryTool
+from utils import Constants, Functions
 
 
 class SubmitTool(discord.ui.View):
@@ -48,7 +48,8 @@ class SubmitTool(discord.ui.View):
         
         Screenshots of entire RuneLite window preferred!"""
 
-        submit_tool = discord.Embed(title=f'Bingo Tile Submission Tool', color=0xFFFF00, description=description)
+        submit_tool = discord.Embed(
+            title=f'Bingo Tile Submission Tool', color=0xFFFF00, description=description)
         submit_tool.set_image(url=self.message.attachments[0].url)
         submit_tool.set_author(name='Dis Function\'s Bingo Bonanza')
         submit_tool.set_footer(text=str(self.uuid_no))
@@ -69,7 +70,8 @@ class SubmitTool(discord.ui.View):
             else:
                 await tool.submit_task(self.bonus[0], self.team, self.uuid_no, self.message.attachments[0].jump_url, str(self.message.id), purple=self.bonus[1], d=self.bonus[2])
 
-        log_tool = LogTool(self.ctx, self.logs_channel, self.team, d, self.uuid_no, task_id=self.task_id)
+        log_tool = LogTool(self.ctx, self.logs_channel,
+                           self.team, d, self.uuid_no, task_id=self.task_id)
         await log_tool.create_log_embed()
         await self.msg.delete()
         self.logger.info('submit_button finished.')

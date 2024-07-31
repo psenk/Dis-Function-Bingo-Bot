@@ -45,22 +45,30 @@ class ApproveTool(discord.ui.View):
         return: Discord Embed instance
         """
         submission = self.submissions[self.page]
-        approve_tool = discord.Embed(title='Submission Approval Tool', color=0xFFFF00)
+        approve_tool = discord.Embed(
+            title='Submission Approval Tool', color=0xFFFF00)
         msg = await self.get_message(submission['message_id'], submission['team'])
         self.uuid_no = submission['uuid_no']
         approve_tool.set_image(url=msg.attachments[0].url)
-        approve_tool.add_field(name='Submission', value=f'[HERE]({submission["jump_url"]})', inline=True)
-        approve_tool.add_field(name='Player', value=f'{submission["player"]}', inline=True)
+        approve_tool.add_field(
+            name='Submission', value=f'[HERE]({submission["jump_url"]})', inline=True)
+        approve_tool.add_field(
+            name='Player', value=f'{submission["player"]}', inline=True)
         approve_tool.add_field(name='', value='', inline=True)
-        approve_tool.add_field(name='Team', value=f'{submission["team"]}', inline=True)
-        approve_tool.add_field(name='Date Submitted', value=f'{submission["date_submitted"].strftime("%Y-%m-%d at %H:%M")}', inline=True)
+        approve_tool.add_field(
+            name='Team', value=f'{submission["team"]}', inline=True)
+        approve_tool.add_field(
+            name='Date Submitted', value=f'{submission["date_submitted"].strftime("%Y-%m-%d at %H:%M")}', inline=True)
         approve_tool.add_field(name='', value='', inline=True)
         if submission['purple'] is None:
-            approve_tool.add_field(name='Task ID', value=f'{submission["task_id"]}', inline=True)
-            approve_tool.add_field(name='Task', value=f'{Constants.TASK_DESCRIPTION_MAP[submission["task_id"]]}', inline=True)
+            approve_tool.add_field(
+                name='Task ID', value=f'{submission["task_id"]}', inline=True)
+            approve_tool.add_field(
+                name='Task', value=f'{Constants.TASK_DESCRIPTION_MAP[submission["task_id"]]}', inline=True)
             approve_tool.add_field(name='', value='', inline=True)
         else:
-            approve_tool.add_field(name='Bonus Task Purple', value=submission['purple'])
+            approve_tool.add_field(
+                name='Bonus Task Purple', value=submission['purple'])
         approve_tool.set_footer(text=submission['uuid_no'])
 
         self.logger.info('populate_embed finished.')
@@ -76,7 +84,8 @@ class ApproveTool(discord.ui.View):
         await interaction.response.defer()
         submission = self.submissions[self.page]
         task_id = submission['task_id']
-        sheets_tool = SheetsTool(submission['team'], submission['date_submitted'], submission['player'], submission['task_id'], submission['purple'])
+        sheets_tool = SheetsTool(submission['team'], submission['date_submitted'],
+                                 submission['player'], submission['task_id'], submission['purple'])
         await self.react_and_refresh(task_id, submission, approve=True, bonus=submission['purple'] is None)
         if submission['purple'] is not None:
             sheets_tool.add_purple(submission['player'])
@@ -116,7 +125,8 @@ class ApproveTool(discord.ui.View):
         return: Discord Message instance
         """
         try:
-            ch = self.bot.get_channel(Constants.TEST_SUBMISSION_CHANNELS.get(team))
+            ch = self.bot.get_channel(
+                Constants.TEST_SUBMISSION_CHANNELS.get(team))
             return await ch.fetch_message(message_id)
         except Exception as e:
             self.logger.error(f'Error getting message -> {e} ')

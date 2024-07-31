@@ -1,3 +1,4 @@
+import uuid
 import os
 from datetime import datetime
 
@@ -7,7 +8,6 @@ from dotenv import load_dotenv
 from utils import Functions
 
 load_dotenv(override=True)
-import uuid
 
 CONNECTION_STRING = os.getenv('PG_CONNECTION_STRING')
 

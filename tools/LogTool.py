@@ -38,13 +38,17 @@ class LogTool(discord.ui.View):
         """
 
         log_embed = discord.Embed(title='Submission Received', color=0xFFFF00)
-        log_embed.set_author(name='Link to Submission', url=self.ctx.message.jump_url)
+        log_embed.set_author(name='Link to Submission',
+                             url=self.ctx.message.jump_url)
 
         log_embed.add_field(name='Team', value=self.team, inline=True)
-        log_embed.add_field(name='Player', value=self.ctx.author.display_name, inline=True)
+        log_embed.add_field(
+            name='Player', value=self.ctx.author.display_name, inline=True)
         log_embed.add_field(name='', value='', inline=True)
-        log_embed.add_field(name='Task', value=f'{Constants.TASK_DESCRIPTION_MAP.get(self.task_id) if self.task_id else "Bonus"}')
-        log_embed.add_field(name='Submitted on', value=self.timestamp, inline=True)
+        log_embed.add_field(
+            name='Task', value=f'{Constants.TASK_DESCRIPTION_MAP.get(self.task_id) if self.task_id else "Bonus"}')
+        log_embed.add_field(name='Submitted on',
+                            value=self.timestamp, inline=True)
         log_embed.add_field(name='', value='', inline=True)
         log_embed.set_footer(text=self.uuid_no)
 

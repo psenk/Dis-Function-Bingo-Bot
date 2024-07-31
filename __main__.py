@@ -1,3 +1,8 @@
+from utils import Choices, Constants, Functions
+from tools.SubmitTool import SubmitTool
+from tools.QueryTool import QueryTool
+from tools.ApproveTool import ApproveTool
+from Game import Game
 import logging
 import os
 import random
@@ -13,12 +18,6 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-from Game import Game
-from tools.ApproveTool import ApproveTool
-from tools.QueryTool import QueryTool
-from tools.SubmitTool import SubmitTool
-
-from utils import Choices, Constants, Functions
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.all()
@@ -26,7 +25,8 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
 bot_logger = logging.getLogger(__name__)
-bot_logger.addHandler(logging.FileHandler(filename='logs/bot.log', encoding='utf-8', mode='w'))
+bot_logger.addHandler(logging.FileHandler(
+    filename='logs/bot.log', encoding='utf-8', mode='w'))
 bot_logger.setLevel(logging.DEBUG)
 
 # TODO: teams database?  expand!!
@@ -48,10 +48,13 @@ async def helpadmin(interaction: discord.Interaction) -> None:
     """
     help_embed = discord.Embed(title='Foki Bot Admin Commands', color=0xFFFF00)
     help_embed.set_thumbnail(url=bot.user.avatar.url)
-    help_embed.add_field(name='/approve', value='Opens tool for reviewing active bingo submissions.\nOnly usable in the bingo admin channel.', inline=True)
-    help_embed.add_field(name='/day X', value='Set day of bingo to X.', inline=True)
+    help_embed.add_field(
+        name='/approve', value='Opens tool for reviewing active bingo submissions.\nOnly usable in the bingo admin channel.', inline=True)
+    help_embed.add_field(
+        name='/day X', value='Set day of bingo to X.', inline=True)
     help_embed.add_field(name='', value='', inline=True)
-    help_embed.add_field(name='/task', value='Display bingo task information.', inline=True)
+    help_embed.add_field(
+        name='/task', value='Display bingo task information.', inline=True)
     await interaction.response.send_message(embed=help_embed)
     bot_logger.info(f'/helpadmin used by -> {interaction.user.display_name}')
 
@@ -147,13 +150,17 @@ async def help(interaction: discord.Interaction) -> None:
     """
     help_embed = discord.Embed(title='Foki Bot Bingo Commands', color=0xFFFF00)
     help_embed.set_thumbnail(url=bot.user.avatar.url)
-    help_embed.add_field(name='/help', value='Displays this help menu.', inline=True)
-    help_embed.add_field(name='!bingosubmit X', value='Submit bingo task X to bingo admin team.', inline=True)
+    help_embed.add_field(
+        name='/help', value='Displays this help menu.', inline=True)
+    help_embed.add_field(
+        name='!bingosubmit X', value='Submit bingo task X to bingo admin team.', inline=True)
     help_embed.add_field(name='', value='', inline=True)
-    help_embed.add_field(name='/bonus', value='Submit a bonus task for the Twisted Joe award.', inline=True)
+    help_embed.add_field(
+        name='/bonus', value='Submit a bonus task for the Twisted Joe award.', inline=True)
     help_embed.add_field(name='/butt', value='Bingo butt!', inline=True)
     help_embed.add_field(name='', value='', inline=True)
-    help_embed.add_field(name='/ranch', value='Ram Ranch really rocks!', inline=True)
+    help_embed.add_field(
+        name='/ranch', value='Ram Ranch really rocks!', inline=True)
 
     await interaction.response.send_message(embed=help_embed)
     bot_logger.info(f'/help used by -> {interaction.user.display_name}')
@@ -218,7 +225,8 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     bot_logger.info(f'/submit task_id -> {task_id}')
 
     await interaction.channel.send(f'Selected Task: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}')
-    bot_logger.info(f'/submit task -> {Constants.TASK_DESCRIPTION_MAP.get(task_id)}')
+    bot_logger.info(
+        f'/submit task -> {Constants.TASK_DESCRIPTION_MAP.get(task_id)}')
     team = Functions.get_user_team(interaction.user.roles)
     bot_logger.info(f'/submit team -> {team}')
 
@@ -251,9 +259,11 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
     logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
     ctx = await bot.get_context(message)
-    submit_tool = SubmitTool(ctx, message, logs_channel, team, uuid_no, task_id=task_id)
+    submit_tool = SubmitTool(ctx, message, logs_channel,
+                             team, uuid_no, task_id=task_id)
     await submit_tool.create_submit_tool_embed()
-    bot_logger.info(f'/submit command used by -> {interaction.user.display_name}')
+    bot_logger.info(
+        f'/submit command used by -> {interaction.user.display_name}')
 
 
 @submit.autocomplete('day')
@@ -351,7 +361,8 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
     ctx = await bot.get_context(message)
     # name, item, time
     submission = [player.display_name, purple.name, date_bonus]
-    submit_tool = SubmitTool(ctx, message, logs_channel, team, uuid_no, bonus=submission)
+    submit_tool = SubmitTool(ctx, message, logs_channel,
+                             team, uuid_no, bonus=submission)
     await submit_tool.create_submit_tool_embed()
 
     await interaction.followup.send('Your bonus submission has been sent to the bingo admin team.', ephemeral=True)
@@ -378,8 +389,8 @@ async def on_ready() -> None:
         bot_logger.error(f'Error syncing command tree -> {e}')
 
 
-bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(filename='logs/discord.log', encoding='utf-8', mode='w'), log_level=logging.DEBUG)
-
+bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(
+    filename='logs/discord.log', encoding='utf-8', mode='w'), log_level=logging.DEBUG)
 
 
 # ? # ? # TEST CODE # ? # ? #

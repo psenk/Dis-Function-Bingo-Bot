@@ -3,16 +3,17 @@ import discord
 DATE_FORMAT = '%m-%d-%y'
 TIME_FORMAT = '%H:%M'
 
-GUILD_ID = 969399636995493899 # * Sith Replacement: 741153043776667658
+GUILD_ID = 969399636995493899  # * Sith Replacement: 741153043776667658
 GUILD = discord.Object(GUILD_ID)  # ! SWAP DURING LIVE BINGO
 
-BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! Sith Replacement: 
+BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! Sith Replacement:
 
-BINGO_TEAM_IDS_LIST = [1262935908777332757]  # ! Sith Replacements: 
-BINGO_TEAM_NAMES_LIST = ['Sasa Loves Bingo', 'Workday Warriors', 'Starship Enterprise', 'The Adamant Watermelons', 'Drunk Chinchompa']
+BINGO_TEAM_IDS_LIST = [1262935908777332757]  # ! Sith Replacements:
+BINGO_TEAM_NAMES_LIST = ['Sasa Loves Bingo', 'Workday Warriors',
+                         'Starship Enterprise', 'The Adamant Watermelons', 'Drunk Chinchompa']
 BINGO_TEAM_SUBMISSION_CHANNEL_IDS_LIST = []
 
-TEST_ADMIN_CHANNEL_ID = 1194488938480537740  # ! Sith Replacement: 
+TEST_ADMIN_CHANNEL_ID = 1194488938480537740  # ! Sith Replacement:
 
 TEST_SUBMISSION_CHANNELS = {
     'Workday Warriors': 1266581710657814599,
