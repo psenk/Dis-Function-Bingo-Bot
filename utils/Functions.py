@@ -15,10 +15,10 @@ def check_task_id(task_no: int) -> bool:
     return: bool - is valid task number?
     """
     if task_no <= 0:
-        print("ERROR: Task submission failed, task id out of bounds. (less than zero)")
+        print('ERROR: Task submission failed, task id out of bounds. (less than zero)')
         return False
     elif task_no > len(Constants.TASK_DESCRIPTION_MAP):
-        print("ERROR: Task submission failed, task id out of bounds. (number too high)")
+        print('ERROR: Task submission failed, task id out of bounds. (number too high)')
         return False
     else:
         return True
@@ -65,17 +65,17 @@ async def validate_data(interaction: discord.Interaction, date: str, time: str) 
         if time:
             datetime.strptime(time, Constants.TIME_FORMAT)
     except ValueError as e:
-        if date and "does not match format" in str(e):
-            await interaction.channel.send("Invalid **date** format. Use format: MM-DD-YY")
-        if time and "does not match format" in str(e):
-            await interaction.channel.send("Invalid **time** format. Use format: HH:MM")
+        if date and 'does not match format' in str(e):
+            await interaction.channel.send('Invalid **date** format. Use format: MM-DD-YY')
+        if time and 'does not match format' in str(e):
+            await interaction.channel.send('Invalid **time** format. Use format: HH:MM')
         return False
     return True
 
 def create_logger(filename: str) -> logging.Logger:
     logger = logging.getLogger(__name__)
     if not logger.handlers:
-        handler = logging.FileHandler(filename=f"logs/{filename}.log", encoding="utf-8", mode="w")
+        handler = logging.FileHandler(filename=f'logs/{filename}.log', encoding='utf-8', mode='w')
         handler.setLevel(logging.DEBUG)
         logger.addHandler(handler)
         logger.setLevel(logging.DEBUG)
