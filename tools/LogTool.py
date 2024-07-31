@@ -22,7 +22,7 @@ class LogTool(discord.ui.View):
         return: None
         """
         super().__init__(timeout=None)
-        self.logger = Functions.create_logger("tools")
+        self.logger = Functions.create_logger('tools')
         self.ctx = ctx
         self.logs_channel = logs_channel
         self.team = team
@@ -37,16 +37,16 @@ class LogTool(discord.ui.View):
         return: None
         """
 
-        log_embed = discord.Embed(title="Submission Received", color=0xFFFF00)
-        log_embed.set_author(name="Link to Submission", url=self.ctx.message.jump_url)
+        log_embed = discord.Embed(title='Submission Received', color=0xFFFF00)
+        log_embed.set_author(name='Link to Submission', url=self.ctx.message.jump_url)
 
-        log_embed.add_field(name="Team", value=self.team, inline=True)
-        log_embed.add_field(name="Player", value=self.ctx.author.display_name, inline=True)
-        log_embed.add_field(name="", value="", inline=True)
-        log_embed.add_field(name="Task", value=f"{Constants.TASK_DESCRIPTION_MAP.get(self.task_id) if self.task_id else 'Bonus'}")
-        log_embed.add_field(name="Submitted on", value=self.timestamp, inline=True)
-        log_embed.add_field(name="", value="", inline=True)
+        log_embed.add_field(name='Team', value=self.team, inline=True)
+        log_embed.add_field(name='Player', value=self.ctx.author.display_name, inline=True)
+        log_embed.add_field(name='', value='', inline=True)
+        log_embed.add_field(name='Task', value=f'{Constants.TASK_DESCRIPTION_MAP.get(self.task_id) if self.task_id else "Bonus"}')
+        log_embed.add_field(name='Submitted on', value=self.timestamp, inline=True)
+        log_embed.add_field(name='', value='', inline=True)
         log_embed.set_footer(text=self.uuid_no)
 
         self.message = await self.logs_channel.send(embed=log_embed, view=self)
-        self.logger.info("create_log_embed finished.")
+        self.logger.info('create_log_embed finished.')

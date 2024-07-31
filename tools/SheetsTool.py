@@ -14,7 +14,7 @@ class SheetsTool():
         param purple: str - optional, name of purple for bonus
         return: None
         """
-        self.logger = Functions.create_logger("tools")
+        self.logger = Functions.create_logger('tools')
         self.team = team
         self.d = d
         self.poster = poster
@@ -27,10 +27,10 @@ class SheetsTool():
         return: GSpread Worksheet object
         """
         try:
-            self.logger.info("Connecting to Google Sheets.")
+            self.logger.info('Connecting to Google Sheets.')
             return gspread.service_account(filename='bingobonanza-b9bddbaa451d.json').open_by_key('1NTA9T3I_zaln0foXbCULhw7WVzunyPbNfafpEjwnjiU')
         except Exception as e:
-            self.logger.error(f"Error connecting to Google Sheets -> {e}", exc_info=True)
+            self.logger.error(f'Error connecting to Google Sheets -> {e}', exc_info=True)
             raise
     
     def update_sheets(self) -> None:
@@ -46,15 +46,15 @@ class SheetsTool():
             # posted date
             worksheet.update_cell(self.task_id + 4, 7, self.d.strftime('%d-%b-%Y'))
             # posted time
-            tz = datetime.timezone(datetime.timedelta(hours=0), name="UTC")
+            tz = datetime.timezone(datetime.timedelta(hours=0), name='UTC')
             worksheet.update_cell(self.task_id + 4, 8, self.d.astimezone(tz).strftime('%H:%M'))
             # posted by
             worksheet.update_cell(self.task_id + 4, 9, self.poster)
             
             self.update_master_sheet()
-            self.logger.info("update_sheets finished.")
+            self.logger.info('update_sheets finished.')
         except Exception as e:
-            self.logger.error(f"Error updating sheets -> {e}", exc_info=True)
+            self.logger.error(f'Error updating sheets -> {e}', exc_info=True)
             raise
         
     def update_master_sheet(self) -> None:
@@ -66,9 +66,9 @@ class SheetsTool():
             book = self.connect_to_google()
             worksheet = book.worksheet('Master')
             worksheet.update_cell(self.task_id + 4, Constants.TEAMS_SHEETS_COLUMN_DICT.get(self.team), 'Complete')
-            self.logger.info("update_master_sheet finished.")
+            self.logger.info('update_master_sheet finished.')
         except Exception as e:
-            self.logger.error(f"Error updating master sheet -> {e}", exc_info=True)
+            self.logger.error(f'Error updating master sheet -> {e}', exc_info=True)
             raise
         
     def add_purple(self, player: str) -> None:
@@ -81,11 +81,11 @@ class SheetsTool():
             # 5 = Purple, 6 = Date, 7 = Time, 8 = Player
             book = self.connect_to_google()
             worksheet = book.worksheet(self.team)
-            values = ["", "", "", "", self.purple, self.d.date().strftime('%d-%b-%Y'), self.d.time().strftime('%H:%M'), player]
+            values = ['', '', '', '', self.purple, self.d.date().strftime('%d-%b-%Y'), self.d.time().strftime('%H:%M'), player]
             worksheet.insert_row(values, index=71)
             formula = '=if(E71="","",E71&" - Obtained By: "&H71&" - On: "&F71&" - At: "&G71)'
-            worksheet.update_acell("D71", formula)
-            self.logger.info("add_purple finished.")
+            worksheet.update_acell('D71', formula)
+            self.logger.info('add_purple finished.')
         except Exception as e:
-            self.logger.error(f"Error adding purple -> {e}", exc_info=True)
+            self.logger.error(f'Error adding purple -> {e}', exc_info=True)
             raise
