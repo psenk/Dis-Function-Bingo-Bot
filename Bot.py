@@ -385,7 +385,7 @@ bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(filename='logs/discord.lo
 # ? # ? # TEST CODE # ? # ? #
 
 
-@bot.tree.command(description='TEST")
+@bot.tree.command(description='TEST')
 @app_commands.guilds(Constants.GUILD)
 async def test_game(interaction: discord.Interaction) -> None:
     await interaction.response.defer()
