@@ -254,7 +254,7 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     # task_id = 999 # ! UNCOMMENT DURING LIVE CODE
     logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
     ctx = await bot.get_context(message)
-    submit_tool = SubmitTool(ctx, message.attachments, logs_channel, task_id, team, uuid_no)
+    submit_tool = SubmitTool(ctx, message, logs_channel, team, uuid_no, task_id=task_id)
     await submit_tool.create_submit_tool_embed()
     bot_logger.info(f"/submit command used by -> {interaction.user.display_name}")
 
@@ -289,8 +289,6 @@ async def auto_complete_task(interaction: discord.Interaction, current: str) -> 
 
 
 # ? # ? # ? # ? #
-
-# ! use submittool dummy
 
 
 @bot.tree.command(description="Submit a bonus task for the Twisted Joe award.")
@@ -334,60 +332,33 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
 
     # get screenshots
     await interaction.channel.send("https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&", delete_after=20.0)
-    message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=30.0)
+    try:
+        message = await bot.wait_for("message", check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=30.0)
+    except Exception as e:
+        bot_logger.error(f'Error obtaining screenshots -> {e}')
+        return
 
     # are there screenshots?
     if not message.attachments:
         await interaction.followup.send("No attachments found.  Please attach submission screenshots.", ephemeral=True)
+        bot_logger.info(f"/bonus failed -> no attachments sent")
         return
 
     # ok cool
-    # confirm submission details
-    confirm_embed = discord.Embed(title="Submission Confirmation", color=0xFFFF00)
-    confirm_embed.add_field(name="Team", value=team, inline=True)
-    confirm_embed.add_field(name="Player", value=player.display_name, inline=True)
-    confirm_embed.add_field(name="", value="", inline=True)
-    confirm_embed.add_field(name="Purple", value=purple.name, inline=True)
-    confirm_embed.add_field(name="Submitted on", value=f"{date + ' at ' + time}", inline=True)
 
-    yesno_view = YesNoTool()
-    confirm_message = await interaction.channel.send(content="Does all of this information look correct?\n_ _", embed=confirm_embed, view=yesno_view, delete_after=30.0)
-    await yesno_view.wait()
-
-    # handle confirmation response
-    if yesno_view.response is None or yesno_view.response == "No":
-        await interaction.followup.send("Bonus submission canceled.", ephemeral=True)
-        return
-
-    await confirm_message.delete()
-    uuid_bonus = uuid.uuid1()
+    uuid_no = uuid.uuid1()
     date = datetime.strptime(date, Constants.DATE_FORMAT).date()
     time = datetime.strptime(time, Constants.TIME_FORMAT).time()
     date_bonus = datetime.combine(date, time)
-
-    async with QueryTool() as tool:
-        await tool.submit_task(player.display_name, team, uuid_bonus, message.jump_url, str(message.id), purple=purple.name)
-
-    ctx = await bot.get_context(confirm_message)
-    log_tool = LogTool(ctx, bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID), team, date_bonus, uuid_bonus)
-    await log_tool.create_log_embed()
+    logs_channel = bot.get_channel(Constants.TEST_ADMIN_CHANNEL_ID)
+    ctx = await bot.get_context(message)
+    # name, item, time
+    submission = [player.display_name, purple.name, date_bonus]
+    submit_tool = SubmitTool(ctx, message, logs_channel, team, uuid_no, bonus=submission)
+    await submit_tool.create_submit_tool_embed()
 
     await interaction.followup.send("Your bonus submission has been sent to the bingo admin team.", ephemeral=True)
     bot_logger.info(f"/bonus used by -> {interaction.user.display_name}")
-
-
-# ? # ? # ? # ? #
-
-
-@bot.tree.command(description="TEST")
-@app_commands.guilds(Constants.GUILD)
-async def test_game(interaction: discord.Interaction) -> None:
-    await interaction.response.defer()
-
-    p = Game.Player(x=7, y=10)
-    game = Game(interaction, p)
-    game.set_map(Game.game_map)
-    await game.start()
 
 
 # ? # ? # ? # ? #
@@ -464,3 +435,17 @@ async def teams(ctx: commands.Context) -> None:
             async with QueryTool() as tool:
                 await tool.update_team_info(team, "channel_id", info["channel_id"], new_channel_id.content)
     await ctx.send("Update successful.")
+
+
+# ? # ? # ? # ? #
+
+
+@bot.tree.command(description="TEST")
+@app_commands.guilds(Constants.GUILD)
+async def test_game(interaction: discord.Interaction) -> None:
+    await interaction.response.defer()
+
+    p = Game.Player(x=7, y=10)
+    game = Game(interaction, p)
+    game.set_map(Game.game_map)
+    await game.start()
