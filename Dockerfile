@@ -3,6 +3,6 @@ WORKDIR /bot
 COPY requirements.txt /bot/
 RUN pip install -r requirements.txt
 COPY . /bot
-RUN mkdir -p /bot/logs
+RUN mkdir -p /logs
 EXPOSE 8080
 CMD python __main__.py
