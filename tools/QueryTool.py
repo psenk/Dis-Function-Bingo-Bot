@@ -83,7 +83,7 @@ class QueryTool:
             self.logger.error(f'Error fetching value -> {e}', exc_info=True)
             raise
 
-    async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None) -> None:
+    async def submit_task(self, player: str, team: str, uuid_no: uuid.UUID, jump_url: str, message_id: str, purple: str = None, task_id: int = None, d = None) -> None:
         """
         Stores bingo submission in the database.
         param player: str - name of bingo player
@@ -91,11 +91,13 @@ class QueryTool:
         param uuid_no - UUID instance
         param jump_url - str - URL to submission
         param message_id: str - id of Discord submission post
-        param purple: optional, item for bonus submission
-        param task_id: optional, bingo task id
+        param purple: str - optional, item for bonus submission
+        param task_id: int - optional, bingo task id
+        param d: datetime - optional, time of bonus submission
         return: None
         """
-        d = datetime.now()
+        if not d:
+            d = datetime.now()
         query = 'INSERT INTO submissions (task_id, player, team, uuid_no, jump_url, message_id, date_submitted, purple) VALUES ($1, $2, $3, $4, $5, $6, $7, $8);'
         await self.execute(query, task_id, player, team, uuid_no, jump_url, message_id, d, purple)
         self.logger.info('Task submitted.')

@@ -141,7 +141,7 @@ class ApproveTool(discord.ui.View):
         return: None
         """
         msg = await self.get_message(submission['message_id'], submission['team'])
-        content = f'Submission for [{"Task #" + str(task_id) + ": " + Constants.TASK_DESCRIPTION_MAP.get(task_id) if submission["purple"] is None else {submission["purple"]}}] has been **{"approved" if approve else "rejected"}**!'
+        content = f'Submission for **[{"Task #" + str(task_id) + ": " + Constants.TASK_DESCRIPTION_MAP.get(task_id) if submission["purple"] is None else submission["purple"]}]({submission["jump_url"]})** has been **{"approved" if approve else "rejected"}**!'
         await self.broadcast(msg, content)
         await msg.add_reaction(f'{"✅" if approve else "❌"}')
         await self.refresh()

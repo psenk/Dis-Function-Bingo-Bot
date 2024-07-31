@@ -43,8 +43,8 @@ class SubmitTool(discord.ui.View):
         description = f"""You are attempting to submit: {submit_text}
         for the team: **{self.team}**.\nIs this correct?\n
         Please ensure your submission contains:
-        -  The bingo codeword plugin
-        -  The key item in view
+        o The bingo codeword plugin
+        o The key item in view
         
         Screenshots of entire RuneLite window preferred!"""
 
@@ -61,15 +61,14 @@ class SubmitTool(discord.ui.View):
     async def submit_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.defer()
         d = datetime.now()
-        response = f'# {self.task_id}: **{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}**' if self.task_id else f'**{self.bonus[1]}**'
-        await interaction.followup.send(f'Submission for Task {response} sent by {interaction.user.display_name} on {d.strftime("%Y-%m-%d at %H:%M")}.')
+        response = f'Task # {self.task_id}: **{Constants.TASK_DESCRIPTION_MAP.get(self.task_id)}**' if self.task_id else f'**{self.bonus[1]}**'
+        await interaction.followup.send(f'Submission for {response} sent by {interaction.user.display_name} on {d.strftime("%Y-%m-%d at %H:%M")}.')
 
         async with QueryTool() as tool:
             if self.task_id:
-                await tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.message.attachments[0].jump_url, str(self.message.id), task_id=self.task_id)
+                await tool.submit_task(interaction.user.display_name, self.team, self.uuid_no, self.message.jump_url, str(self.message.id), task_id=self.task_id)
             else:
-                await tool.submit_task(self.bonus[0], self.team, self.uuid_no, self.message.attachments[0].jump_url, str(self.message.id), purple=self.bonus[1], d=self.bonus[2])
-
+                await tool.submit_task(self.bonus[0], self.team, self.uuid_no, self.message.jump_url, str(self.message.id), purple=self.bonus[1], d=self.bonus[2])
         log_tool = LogTool(self.ctx, self.logs_channel,
                            self.team, d, self.uuid_no, task_id=self.task_id)
         await log_tool.create_log_embed()
