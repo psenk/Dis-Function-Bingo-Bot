@@ -1,8 +1,3 @@
-from utils import Choices, Constants, Functions
-from tools.SubmitTool import SubmitTool
-from tools.QueryTool import QueryTool
-from tools.ApproveTool import ApproveTool
-from Game import Game
 import logging
 import os
 import random
@@ -15,6 +10,12 @@ from discord import app_commands
 from discord.app_commands import Choice
 from discord.ext import commands
 from dotenv import load_dotenv
+
+from Game import Game
+from tools.ApproveTool import ApproveTool
+from tools.QueryTool import QueryTool
+from tools.SubmitTool import SubmitTool
+from utils import Choices, Constants, Functions
 
 load_dotenv(override=True)
 
@@ -52,7 +53,7 @@ async def helpadmin(interaction: discord.Interaction) -> None:
     help_embed.add_field(
         name='/approve', value='Opens tool for reviewing active bingo submissions.\nOnly usable in the bingo admin channel.', inline=True)
     help_embed.add_field(
-        name='/day X', value='Set day of bingo to X.', inline=True)
+        name='/day', value='Set day of bingo.', inline=True)
     help_embed.add_field(name='', value='', inline=True)
     help_embed.add_field(
         name='/task', value='Display bingo task information.', inline=True)
@@ -154,7 +155,7 @@ async def help(interaction: discord.Interaction) -> None:
     help_embed.add_field(
         name='/help', value='Displays this help menu.', inline=True)
     help_embed.add_field(
-        name='!bingosubmit X', value='Submit bingo task X to bingo admin team.', inline=True)
+        name='/submit', value='Submit bingo task bingo admin team.', inline=True)
     help_embed.add_field(name='', value='', inline=True)
     help_embed.add_field(
         name='/bonus', value='Submit a bonus task for the Twisted Joe award.', inline=True)
@@ -203,7 +204,7 @@ async def ranch(interaction: discord.Interaction) -> None:
     param interaction: Discord Interaction instance
     return: None
     """
-    await interaction.response.send_message('https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&')
+    await interaction.response.send_message(Constants.RANCH_IMAGE_URL)
     bot_logger.info(f'/ranch used by -> {interaction.user.display_name}')
 
 
@@ -244,7 +245,7 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
         return
 
     # get screenshots
-    await interaction.channel.send('https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&', delete_after=20.0)
+    await interaction.channel.send(Constants.SUBMISSION_IMAGE_URL, delete_after=20.0)
     message = await bot.wait_for('message', check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=60.0)
     bot_logger.info(f'/submit attachments message -> {message}')
 
@@ -339,7 +340,7 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
         return
 
     # get screenshots
-    await interaction.channel.send('https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&', delete_after=20.0)
+    await interaction.channel.send(Constants.SUBMISSION_IMAGE_URL, delete_after=20.0)
     try:
         message = await bot.wait_for('message', check=lambda m: m.author == interaction.user and m.channel == interaction.channel, timeout=30.0)
     except Exception as e:

@@ -9,7 +9,7 @@ GUILD = discord.Object(GUILD_ID)  # ! SWAP DURING LIVE BINGO
 BINGO_ADMIN_ROLE_ID = 1265728711731183759  # ! Sith Replacement:
 
 BINGO_TEAM_IDS_LIST = [1262935908777332757]  # ! Sith Replacements:
-BINGO_TEAM_NAMES_LIST = ['Sasa Loves Bingo', 'Workday Warriors',
+BINGO_TEAM_NAMES_LIST = ['Big Bears', 'Workday Warriors',
                          'Starship Enterprise', 'The Adamant Watermelons', 'Drunk Chinchompa']
 BINGO_TEAM_SUBMISSION_CHANNEL_IDS_LIST = []
 
@@ -19,7 +19,7 @@ TEST_SUBMISSION_CHANNELS = {
     'Workday Warriors': 1266581710657814599,
     'Starship Enterprise': 1266581710657814599,
     'The Adamant Watermelons': 1266581710657814599,
-    'Sasa Loves Bingo': 1266581710657814599,
+    'Big Bears': 1266581710657814599,
     'Drunk Chinchompa': 1266581710657814599,
 }
 
@@ -160,7 +160,10 @@ TEAMS_SHEETS_COLUMN_DICT = {
     # value must be int, not char
     'Workday Warriors': 6,
     'The Adamant Watermelons': 7,
-    'Sasa Loves Bingo': 8,
+    'Big Bears': 8,
     'Drunk Chinchompa': 9,
     'Starship Enterprise': 10,
 }
+
+RANCH_IMAGE_URL = 'https://cdn.discordapp.com/attachments/1195577008973946890/1265373919788011540/Screenshot_2024-07-12_115957.jpg?ex=66a53b4b&is=66a3e9cb&hm=662036eb2d866fbf462af74a746926fdb5750e3a2022c8afa0b94b46b48fc0f7&'
+SUBMISSION_IMAGE_URL = 'https://cdn.discordapp.com/attachments/1195577008973946890/1267326377259172010/submit.png?ex=66a8612a&is=66a70faa&hm=62156fc5695b715eeb1c46388aa96763d99fe96f82c4df146e6ff2125dd4c24e&'
