@@ -53,7 +53,7 @@ async def helpadmin(interaction: discord.Interaction) -> None:
     help_embed.add_field(
         name='/approve', value='Opens tool for reviewing active bingo submissions.\nOnly usable in the bingo admin channel.', inline=True)
     help_embed.add_field(
-        name='/day', value='Set day of bingo.', inline=True)
+        name='/day', value='Set day of bingo.  Set to day 69 to refuse all bingo submissions.', inline=True)
     help_embed.add_field(name='', value='', inline=True)
     help_embed.add_field(
         name='/task', value='Display bingo task information.', inline=True)
@@ -223,10 +223,14 @@ async def submit(interaction: discord.Interaction, day: int, task: int) -> None:
     return: None
     """
     await interaction.response.defer()
+    async with QueryTool() as tool:
+        day = await tool.get_day()
+    if day == 69:
+        await interaction.followup.send("Submissions are no longer accepted!")
+        return
     task_id = (day * 9) + (task - 9)
     bot_logger.info(f'/submit task_id -> {task_id}')
 
-    await interaction.channel.send(f'Selected Task: {Constants.TASK_DESCRIPTION_MAP.get(task_id)}')
     bot_logger.info(
         f'/submit task -> {Constants.TASK_DESCRIPTION_MAP.get(task_id)}')
     team = Functions.get_user_team(interaction.user.roles)
@@ -316,7 +320,11 @@ async def bonus(interaction: discord.Interaction, purple: Choice[int], date: str
     return: None
     """
     await interaction.response.defer()
-
+    async with QueryTool() as tool:
+        day = await tool.get_day()
+    if day == 69:
+        await interaction.followup.send("Submissions are no longer accepted!")
+        return
     # is user in bingo?
     if not Functions.get_user_team(interaction.user.roles):
         await interaction.followup.send('You are not authorized to use this command!', ephemeral=True)
