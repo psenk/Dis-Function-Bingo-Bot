@@ -398,6 +398,10 @@ async def on_ready() -> None:
     except Exception as e:
         bot_logger.error(f'Error syncing command tree -> {e}')
 
+@bot.event
+async def on_message(msg) -> None:
+    if '!bingobutt' in msg.content:
+        pass
 
 bot.run(DISCORD_TOKEN, log_handler=logging.FileHandler(
     filename='logs/discord.log', encoding='utf-8', mode='w'), log_level=logging.DEBUG)
